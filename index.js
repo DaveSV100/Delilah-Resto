@@ -1,31 +1,34 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { response } = require('express');
-
+const compression = require('compression');
+const { use } = require('express/lib/application');
 const app = express();
 const port = 3000;
+// const { response } = require('express');
 
+app.use(compression());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-
+app.use(express.json());
 //Port listener
 app.listen(port, () => {
-    console.log('Server started at port 3000');
+    console.log('Server started on port 3000');
 })
 
 //This will be linked to the data base in the future
 const data = [
     {
+        id: 1,
         name: 'David',
         email: 'davidsv20@icloud.com',
         country: 'Mexico',
     },
-    {
+    {   id: 2,
         name: 'Steve',
         email: 'steve@icloud.com',
         country: 'Spain'
     },
-    {
+    {   id: 3,
         name: 'Anne',
         email: 'anne@icloud.com',
         country: 'Scotland'
@@ -33,6 +36,7 @@ const data = [
 ]
 
 //Get users (read, obtain)
+//All users
 app.get('/users', (req, res) => {
     getResponse = {
         error: false,
@@ -42,11 +46,68 @@ app.get('/users', (req, res) => {
     };
     res.status(200).send(getResponse);
 });
+//Simple get
+app.get('/users', (req, res) => {
+    res.status(200).send(data);
+});
+
+//Middleware
+const verifyId = (req, res, next) => {
+    let contact = data.find(item => item.id == req.params.id)
+    if (!contact) {
+        // res.status(404).json('User not found');
+        res.status(404).send('ID not found');
+    } 
+    next();
+}
+app.get('/users/:id', verifyId, (req, res, next) => {
+    //Find returns the element found
+    let contact = data.find(item => item.id == req.params.id)
+    res.status(200).send(contact);
+});
+app.delete('/users/:id', verifyId, (req, res, next) => {
+    let id = req.params.id;
+    let index = data.findIndex(item => item.id == id);
+    console.log(index)
+    data.splice(index,1);
+    res.status(200).json(data);
+});
+//Middleware
+const verifyName = (req, res, next) => {
+    let contact = data.find(item => item.name == req.params.name)
+    if (!contact) {
+        // res.status(404).json('User not found');
+        res.status(404).send('User not found');
+    } 
+    next();
+}
+//Get users (read, obtain)
+//NAME
+app.get('/users/:name', verifyName, (req, res, next) => {
+    let contact = data.find(item => item.name == req.params.name)
+    // if (contact) {
+    //     getResponse = {
+    //         error: false,
+    //         code: 200,
+    //         message: 'Get user',
+    //         response: contact
+    //     };
+    // } else {
+    //     getResponse = {
+    //         error: true,
+    //         code: 404,
+    //         message: 'User not found'
+    //     };
+    // }
+    res.status(200).send(contact);
+});
 
 //Post users (write or create)
 app.post('/users', (req, res) => {
+    console.log(req.body.id);
     console.log(req.body.name);
     console.log(req.body.email);
+    console.log(req.body.country);
     if(!req.body.name || !req.body.email) {
         postResponse = {
             error: true,
@@ -55,9 +116,10 @@ app.post('/users', (req, res) => {
         };
     } else {
         user = {
+            id: req.body.id,
             name: req.body.name,
             email: req.body.email,
-            email: req.body.country
+            country: req.body.country
         }
     }
     data.push(user);
@@ -123,7 +185,7 @@ app.delete('/users', (req, res) => {
     res.status(200).send(putResponse);
 })
 
-//If there's an error
+//Global middleware
 app.use((req, res, next) => {
     useResponse = {
         error: true,
@@ -132,24 +194,16 @@ app.use((req, res, next) => {
     };
     res.status(404).send(useResponse);
 })
-
-// const express = require('express');
-// const app = express();
-// const port = 3000;
-
-// const bodyParser = require('body-parser');
-// app.use(bodyParser.urlencoded({extended: false}));
-// app.use(bodyParser.json());
-
-// //Port listener
-// app.listen(port, () => {
-//     console.log(`Server started at port ${port}`);
-// })
-// app.use(function (req, res, next) {
-//     res = {
-//         error: true,
-//         codigo: 404,
-//         mensaje: 'URL no encontrada'
-//     };
-//     res.status(404).send(respuesta);
-// })
+// Global middleware
+app.use((req, res, next) => {
+    console.log('This is a middleware');
+    next();
+})
+//Local middleware
+const middleware = (req, res) => {
+    res.json('Global middleware');
+    next();
+}
+app.get('/users', middleware, (req, res) => {
+    res.send('My route')
+})
