@@ -17,14 +17,22 @@ app.listen(port, () => {
 const data = [
     {
         name: 'David',
-        email: 'davidsv20@icloud.com'
+        email: 'davidsv20@icloud.com',
+        country: 'Mexico',
     },
     {
         name: 'Steve',
-        email: 'steve@icloud.com'
+        email: 'steve@icloud.com',
+        country: 'Spain'
+    },
+    {
+        name: 'Anne',
+        email: 'anne@icloud.com',
+        country: 'Scotland'
     }
 ]
-//Get users
+
+//Get users (read, obtain)
 app.get('/users', (req, res) => {
     getResponse = {
         error: false,
@@ -34,13 +42,23 @@ app.get('/users', (req, res) => {
     };
     res.status(200).send(getResponse);
 });
-//Post users
+
+//Post users (write or create)
 app.post('/users', (req, res) => {
     console.log(req.body.name);
     console.log(req.body.email);
-    user = {
-        name: req.body.name,
-        email: req.body.email
+    if(!req.body.name || !req.body.email) {
+        postResponse = {
+            error: true,
+            code: 502,
+            message: "Name and email are required"
+        };
+    } else {
+        user = {
+            name: req.body.name,
+            email: req.body.email,
+            email: req.body.country
+        }
     }
     data.push(user);
     postResponse = {
@@ -51,6 +69,60 @@ app.post('/users', (req, res) => {
     }
     res.status(200).send(postResponse);
 })
+
+//Put users (modify or update)
+app.put('/users', (req, res) => {
+    let filtered = data.filter(e => e.name === req.body.name);
+    console.log(filtered)
+
+    if(filtered.length === 0) {
+        putResponse = {
+            error: true,
+            code: 501,
+            message: 'Name (user) not found'
+        };
+    } else {
+        filtered.forEach(e => {
+            e.email = req.body.email
+            e.country = req.body.country
+        });
+        putResponse = {
+            error: false,
+            code: 200,
+            message: filtered
+        }
+    }
+
+    res.status(200).send(putResponse);
+})
+
+//Delete users (delete or remove)
+app.delete('/users', (req, res) => {
+    let filtered = data.filter(e => e.name === req.body.name);
+    console.log(filtered)
+
+    if(filtered.length === 0) {
+        putResponse = {
+            error: true,
+            code: 501,
+            message: 'Name (user) not found'
+        };
+    } else {
+        filtered.forEach(e => {
+            e.name = null
+            e.email = null
+            e.country = null
+        });
+        putResponse = {
+            error: false,
+            code: 200,
+            message: filtered
+        }
+    }
+
+    res.status(200).send(putResponse);
+})
+
 //If there's an error
 app.use((req, res, next) => {
     useResponse = {
