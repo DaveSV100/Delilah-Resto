@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(cors(corsOptions));
 
 
-//Protegemos todo menos el /login
+//Protegemos todo menos el login
 
 app.use(expressJwt({ secret: jwtClave, algorithms: ['RS256'] }).unless({ path: ["/login"] }));
 
