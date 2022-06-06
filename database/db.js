@@ -27,10 +27,6 @@ app.get("/usuarios", (req, res) => {
             res.status(200).send(JSON.stringify(records, null, 2));
         })
     }
-    // response = {
-    //     records: "Registro de usuarios",
-    // };
-    // res.status(200).send(response);
 });
 
 app.post("/usuarios", (req, res) => {
@@ -54,6 +50,6 @@ app.use(function(req, res, next) {
     res.status(404).send(globalres);
 });
 
-app.listen(3000, () => {
-    console.log("Server running at port 3000");
+app.listen(3001, () => {
+    console.log("Server running at port 3001");
 })
