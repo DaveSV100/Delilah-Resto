@@ -114,7 +114,7 @@ const verifyId = (req, res, next) => {
       // res.status(200).send(JSON.stringify(records, null, 2));
     });
 };
-app.get("/users/:id", verifyId, (req, res) => {
+app.get("/login/:id", verifyId, (req, res) => {
   const id = req.params.id;
   console.log(id);
   if (req.params.id != null) {
