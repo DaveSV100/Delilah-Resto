@@ -2,6 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const compression = require("compression");
 const sequelize = require("./database/connection.js");
+const jwt = require("jsonwebtoken");
+const expressJwt = require("express-jwt");
 // const { use } = require('express/lib/application');
 const app = express();
 const port = 3000;
@@ -34,22 +36,6 @@ const data = [
   { id: 2, name: "Steve", email: "steve@icloud.com", country: "Spain" },
   { id: 3, name: "Anne", email: "anne@icloud.com", country: "Scotland" },
 ];
-
-//Get users (read, obtain)
-//All users
-// app.get('/users', (req, res) => {
-//     getResponse = {
-//         error: false,
-//         code: 200,
-//         message: 'Get users',
-//         dataBase: data
-//     };
-//     res.status(200).send(getResponse);
-// });
-// //Simple get
-// app.get('/users', (req, res) => {
-//     res.status(200).send(data);
-// });
 app.get("/", (req, res) => {
   res.status(200).send("Bienvenido a Delilah Resto");
 });
@@ -74,25 +60,26 @@ app.get("/login", (req, res) => {
 //Loging with username and password
 // sequelize.query('INSERT INTO`restaurant`(`ID_USER`, `NOM_RESTO`, `ADRESSE`) VALUES(?, ?, ?)',
 //         { replacements: array_insert, type: sequelize.QueryTypes.SELECT }
-app.post("/login", (req, res) => {
-  const thename = req.body.name;
-  console.log(thename);
-  if (req.body.name != null) {
-    sequelize
-      .query("SELECT * FROM usuarios WHERE name = ?", {
-        replacements: [req.body.name],
-        type: sequelize.QueryTypes.SELECT,
-      })
-      .then(function (records) {
-        res.status(200).send(JSON.stringify(records, null, 2));
-      });
-  } else {
-    res.status(400).send("error :v");
-    // sequelize.query('SELECT * FROM usuarios', { type: sequelize.QueryTypes.SELECT })
-    // .then(function(records) {
-    //     res.status(200).send(JSON.stringify(records, null, 2));
-    // })
-  }
+//Middleware to check if the user already exists
+const verifyUser = (req, res, next) => {
+    if(req.body.name && req.body.password != "") {
+        sequelize.query("SELECT * FROM usuarios WHERE name = ? && password = ?", { replacements: [req.body.name, req.body.password], type: sequelize.QueryTypes.SELECT, })
+        .then((records) => {
+            //This if statment verifies whether there's data or not
+            if (records[0]) {
+                next();
+            } else if (records[0] == null) {
+                res.status(404).send("User not found :V")
+            }
+        })
+    } else {
+        res.status(404).send("You need to insert your name and password");
+    }
+}
+app.post("/login", verifyUser, (req, res) => {
+  const username = req.body.name;
+  sequelize.query("SELECT * FROM usuarios WHERE name = ?", {replacements: [req.body.name],type: sequelize.QueryTypes.SELECT,})
+  .then(function (records) {res.status(200).send(`You're welcome ${records[0].Name}`)});
 });
 //Middleware
 const verifyId = (req, res, next) => {
@@ -116,7 +103,7 @@ const verifyId = (req, res, next) => {
 };
 app.get("/login/:id", verifyId, (req, res) => {
   const id = req.params.id;
-  console.log(id);
+  console.log("this is id " +id);
   if (req.params.id != null) {
     sequelize
       .query("SELECT * FROM usuarios WHERE id = ?", {
@@ -124,7 +111,8 @@ app.get("/login/:id", verifyId, (req, res) => {
         type: sequelize.QueryTypes.SELECT,
       })
       .then(function (records) {
-        res.status(200).send(JSON.stringify(records, null, 2));
+          console.log(records[0].id)
+        res.status(200).send(JSON.stringify(records));
       });
   } else {
     // sequelize.query('SELECT * FROM usuarios', { type: sequelize.QueryTypes.SELECT })
@@ -241,7 +229,7 @@ app.put("/users", (req, res) => {
 });
 
 //Delete users (delete or remove)
-app.delete("/users", (req, res) => {
+app.delete("/login", (req, res) => {
   let filtered = data.filter((e) => e.name === req.body.name);
   console.log(filtered);
 
