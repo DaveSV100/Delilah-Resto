@@ -11,7 +11,6 @@ const corsOptions = {
 }
 const app = express();
 const jwtKey = process.env.JWTKEY;
-
 app.use(express.json());
 app.use(cors(corsOptions));
 //algorithms: ["RS256"]

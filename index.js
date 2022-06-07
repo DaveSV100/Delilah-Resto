@@ -1,9 +1,11 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const compression = require("compression");
 const sequelize = require("./database/connection.js");
 const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
+const jwtKey = process.env.JWTKEY;
 // const { use } = require('express/lib/application');
 const app = express();
 const port = 3000;
@@ -79,7 +81,13 @@ const verifyUser = (req, res, next) => {
 app.post("/login", verifyUser, (req, res) => {
   const username = req.body.name;
   sequelize.query("SELECT * FROM usuarios WHERE name = ?", {replacements: [req.body.name],type: sequelize.QueryTypes.SELECT,})
-  .then(function (records) {res.status(200).send(`You're welcome ${records[0].Name}`)});
+  .then(function (records) {
+        res.status(200).send(`You're welcome ${records[0].Name}`);
+        const token = jwt.sign({
+            message: `Token for ${username}`
+        }, jwtKey);
+        console.log(token);
+    });
 });
 //Middleware
 const verifyId = (req, res, next) => {
