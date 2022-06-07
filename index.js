@@ -7,12 +7,16 @@ const app = express();
 const port = 3000;
 const helmet = require("helmet");
 // const { response } = require('express');
-
+const cors = require("cors");
+const corsOptions = {
+    origin: "http://127.0.0.1:3000",
+}
 app.use(compression());
 app.use(helmet());
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.json());
+app.use(cors(corsOptions));
 
 //Port listener
 app.listen(port, () => {
