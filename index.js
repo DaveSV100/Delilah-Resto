@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors(corsOptions));
 //algorithms: ["RS256"]
-// app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/login"] }));
+app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/login"] }));
 //Port listener
 app.listen(port, () => {
   console.log(`Server started at port ${port}`);
@@ -69,7 +69,7 @@ app.post("/login", verifyUser, (req, res) => {
   .then(function (records) {
         const token = jwt.sign({
             user: username
-        }, jwtKey);
+        }, jwtKey, { expiresIn: "1h" },);
         res.status(200).json({
             token
         });
@@ -78,18 +78,18 @@ app.post("/login", verifyUser, (req, res) => {
 });
 
 
-const verifyToken = (req, res, next) => {
-    const bearerHeader = req.headers["authorization"];
-    if(typeof bearerHeader !== "undefined") {
-        const bearer = bearerHeader.split(" ");
-        const bearerToken = bearer[1];
-        req.token = bearerToken;
-        next();
-    } else {
-        res.status(403).send("You're not a user, you need to sign up");
-    }
-}
-app.get("/login", verifyToken, (req, res) => {
+// const verifyToken = (req, res, next) => {
+//     const bearerHeader = req.headers["authorization"];
+//     if(typeof bearerHeader !== "undefined") {
+//         const bearer = bearerHeader.split(" ");
+//         const bearerToken = bearer[1];
+//         req.token = bearerToken;
+//         next();
+//     } else {
+//         res.status(403).send("You're not a user, you need to sign up");
+//     }
+// }
+app.get("/users", (req, res) => {
     // jwt.verify(req.token, jwtKey);
   if (req.query.name != null) {
     sequelize
