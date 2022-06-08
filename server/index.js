@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const compression = require("compression");
-const sequelize = require("./database/connection.js");
+const sequelize = require("../database/connection.js");
 const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
 const jwtKey = process.env.JWTKEY;
@@ -18,7 +18,6 @@ const corsOptions = {
 }
 app.use(compression());
 app.use(helmet());
-// app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors(corsOptions));
@@ -26,20 +25,9 @@ app.use(cors(corsOptions));
 app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/login"] }));
 //Port listener
 app.listen(port, () => {
-  console.log(`Server started at port ${port}`);
+  console.log(`Server started on port ${port}`);
 });
 
-//This will be linked to the data base in the future
-const data = [
-  {
-    id: 1,
-    name: "David",
-    email: "davidsv20@icloud.com",
-    country: "Mexico",
-  },
-  { id: 2, name: "Steve", email: "steve@icloud.com", country: "Spain" },
-  { id: 3, name: "Anne", email: "anne@icloud.com", country: "Scotland" },
-];
 app.get("/", (req, res) => {
   res.status(200).send("Bienvenido a Delilah Resto");
 });
@@ -49,34 +37,33 @@ app.get("/", (req, res) => {
 //         { replacements: array_insert, type: sequelize.QueryTypes.SELECT }
 //Middleware to check if the user already exists
 const verifyUser = (req, res, next) => {
-    if(req.body.name && req.body.password != "") {
-        sequelize.query("SELECT * FROM usuarios WHERE name = ? && password = ?", { replacements: [req.body.name, req.body.password], type: sequelize.QueryTypes.SELECT, })
-        .then((records) => {
-            //This if statment verifies whether there's data or not
-            if (records[0]) {
-                next();
-            } else if (records[0] == null) {
-                res.status(404).send("User not found :V")
-            }
-        })
-    } else {
-        res.status(404).send("You need to insert your name and password");
-    }
+  if(req.body.name && req.body.password != "") {
+      sequelize.query("SELECT * FROM usuarios WHERE name = ? && password = ?", { replacements: [req.body.name, req.body.password], type: sequelize.QueryTypes.SELECT, })
+      .then((records) => {
+          //This if statment verifies whether there's data or not
+          if (records[0]) {
+              next();
+          } else if (records[0] == null) {
+              res.status(404).send("User not found :V")
+          }
+      })
+  } else {
+      res.status(404).send("You need to insert your name and password");
+  }
 }
 app.post("/login", verifyUser, (req, res) => {
-  const username = req.body.name;
-  sequelize.query("SELECT * FROM usuarios WHERE name = ?", {replacements: [req.body.name],type: sequelize.QueryTypes.SELECT,})
-  .then(function (records) {
-        const token = jwt.sign({
-            user: username
-        }, jwtKey, { expiresIn: "1h" },);
-        res.status(200).json({
-            token
-        });
-        console.log(token);
-    });
+const username = req.body.name;
+sequelize.query("SELECT * FROM usuarios WHERE name = ?", {replacements: [req.body.name],type: sequelize.QueryTypes.SELECT,})
+.then(function (records) {
+      const token = jwt.sign({
+          user: username
+      }, jwtKey, { expiresIn: "1h" },);
+      res.status(200).json({
+          token
+      });
+      console.log(token);
+  });
 });
-
 
 // const verifyToken = (req, res, next) => {
 //     const bearerHeader = req.headers["authorization"];
@@ -89,25 +76,28 @@ app.post("/login", verifyUser, (req, res) => {
 //         res.status(403).send("You're not a user, you need to sign up");
 //     }
 // }
+
 app.get("/users", (req, res) => {
-    // jwt.verify(req.token, jwtKey);
-  if (req.query.name != null) {
-    sequelize
-      .query("SELECT * FROM usuarios WHERE name = ?", {
-        replacements: [req.query.name],
-        type: sequelize.QueryTypes.SELECT,
-      })
-      .then(function (records) {
-        res.status(200).send(JSON.stringify(records, null, 2));
-      });
-  } else {
-    sequelize
-      .query("SELECT * FROM usuarios", { type: sequelize.QueryTypes.SELECT })
-      .then(function (records) {
-        res.status(200).send(JSON.stringify(records, null, 2));
-      });
-  }
+  // jwt.verify(req.token, jwtKey);
+if (req.query.name != null) {
+  sequelize
+    .query("SELECT * FROM usuarios WHERE name = ?", {
+      replacements: [req.query.name],
+      type: sequelize.QueryTypes.SELECT,
+    })
+    .then(function (records) {
+      res.status(200).send(JSON.stringify(records, null, 2));
+    });
+} else {
+  sequelize
+    .query("SELECT * FROM usuarios", { type: sequelize.QueryTypes.SELECT })
+    .then(function (records) {
+      res.status(200).send(JSON.stringify(records, null, 2));
+    });
+}
 });
+
+
 //Middleware
 const verifyId = (req, res, next) => {
   idquery = req.params.id;
