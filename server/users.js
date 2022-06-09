@@ -1,3 +1,13 @@
+const express = require("express");
+const sequelize = require("../database/connection.js");
+const jwt = require("jsonwebtoken");
+const expressJwt = require("express-jwt");
+const jwtKey = process.env.JWTKEY;
+const router = express.Router();
+
+//algorithms: ["RS256"]
+// router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/login"] }));
+
 //Loging with username and password
 // sequelize.query('INSERT INTO`restaurant`(`ID_USER`, `NOM_RESTO`, `ADRESSE`) VALUES(?, ?, ?)',
 //         { replacements: array_insert, type: sequelize.QueryTypes.SELECT }
@@ -17,7 +27,7 @@ const verifyUser = (req, res, next) => {
         res.status(404).send("You need to insert your name and password");
     }
 }
-app.post("/login", verifyUser, (req, res) => {
+router.post("/", verifyUser, (req, res) => {
   const username = req.body.name;
   sequelize.query("SELECT * FROM usuarios WHERE name = ?", {replacements: [req.body.name],type: sequelize.QueryTypes.SELECT,})
   .then(function (records) {
@@ -43,7 +53,7 @@ app.post("/login", verifyUser, (req, res) => {
 //     }
 // }
 
-app.get("/users", (req, res) => {
+router.get("/", (req, res) => {
     // jwt.verify(req.token, jwtKey);
   if (req.query.name != null) {
     sequelize
@@ -62,3 +72,5 @@ app.get("/users", (req, res) => {
       });
   }
 });
+
+module.exports = router;
