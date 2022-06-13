@@ -21,10 +21,10 @@ app.use(express.json());
 app.use(cors(corsOptions));
 
 const userRoute = require("./users.js");
-app.use("/login", userRoute);
+app.use("/", userRoute);
 
 //algorithms: ["RS256"]
-app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/login"] }));
+app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/login", "/signup" ] }));
 //Port listener
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
