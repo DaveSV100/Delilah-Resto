@@ -45,8 +45,23 @@ router.post("/", verifyUser, async (req, res) => {
     } catch (error) {
         console.error(error);
     }
-  });
-
+});
+router.post("/signup", async (req, res) => {
+    const { name, email, password, direction } = req.body;
+    try {
+        if (name && email && password && direction) {
+            const add = await sequelize.query(
+                "INSERT INTO usuarios (Name, Email, Password, Direction) VALUES (:name, :email, :password, :direction)",
+                { replacements: {name, email, password, direction } }
+            )
+            res.status(200).json("User added");
+        } else {
+            res.status(400);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+});
 router.get("/", (req, res) => {
     // jwt.verify(req.token, jwtKey);
   if (req.query.name != null) {
