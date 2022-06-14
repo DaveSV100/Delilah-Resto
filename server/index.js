@@ -25,7 +25,7 @@ const dishes = require("./dishes.js");
 app.use("/", userRoute);
 app.use("/", dishes);
 //algorithms: ["RS256"]
-app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/login", "/signup" ] }));
+app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/", "/login", "/signup" ] }));
 //Port listener
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
