@@ -85,6 +85,37 @@ router.post("/signup", existingUser, async (req, res) => {
     }
 });
 
+//**UPDATE**
+router.put("/modifyuser", verifyUser, async(req, res) => {
+    const { name, email, password, direction, admin } = req.body;
+    try {
+        const user_id = await sequelize.query("SELECT id FROM usuarios WHERE email = ?", { replacements: [req.body.email], type: sequelize.QueryTypes.SELECT, })
+        const update = await sequelize.query(
+            "UPDATE usuarios SET name = :name, email = :email, password = :password, direction = :direction, admin = :admin WHERE id = :id",
+            { replacements: {name, email, password, direction, admin, id: user_id[0].id} }
+        )
+        res.status(200).json(`User updated corrrectly`);
+    } catch (error) {
+        console.error(error);
+        res.status(400);
+    }
+})
+
+/**DELETE**/
+router.delete("/deleteuser", verifyUser, async(req, res) => {
+    try {
+        const user = await sequelize.query("SELECT id FROM usuarios WHERE email = ?", { replacements: [req.body.email], type: sequelize.QueryTypes.SELECT, })
+        const user_id = user[0].id;
+        const deleteUser = await sequelize.query(
+            "DELETE FROM usuarios WHERE id = :id",
+            { replacements: {id: user_id} }
+        )
+        res.status(200).json("User removed");
+    } catch (error) {
+        console.error(error);
+    }
+})
+
 
 //Simple login with get endpoint to test if JWT Key is working
 // router.get("/login", (req, res) => {
