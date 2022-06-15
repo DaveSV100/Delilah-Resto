@@ -1,12 +1,12 @@
 const express = require("express");
 const sequelize = require("../database/connection.js");
 const jwt = require("jsonwebtoken");
-// const expressJwt = require("express-jwt");
+const expressJwt = require("express-jwt");
 const jwtKey = process.env.JWTKEY;
 const router = express.Router();
 
 //algorithms: ["RS256"]
-// router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/login"] }));
+router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/login"] }));
 
 //Loging with username and password
 // sequelize.query('INSERT INTO`restaurant`(`ID_USER`, `NOM_RESTO`, `ADRESSE`) VALUES(?, ?, ?)',
