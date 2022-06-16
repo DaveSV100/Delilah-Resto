@@ -5,37 +5,67 @@ const expressJwt = require("express-jwt");
 const jwtKey = process.env.JWTKEY;
 const router = express.Router();
 
-// router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/", "/login", "/signup" ] }));
+router.use(
+    expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/", "/login", "/signup" ] }),
+);
+router.use(function (err, req, res, next) {
+    if (err.name === "UnauthorizedError") {
+        res.status(401).send("You need to sign in or sign up");
+    } else {
+        next(err);
+    }
+})
 //Middleware to verify if user is admin
-const jwtVerification = async(req, res, next) => {
-    const token = req.headers.authorization.split(" ")[1];
-    try {
+// const jwtVerification = async(req, res, next) => {
+//     const token = req.headers.authorization.split(" ")[1];
+//     try {
         
-        const verification = jwt.verify(token, jwtKey);
-        // console.log(verification.payload.admin)
-        req.data = verification;
-        next()
-    } catch(error) {
-        console.error(error)
-    }
-}
-const isAdmin = async(req, res, next) => {
-    // const tokenData = req.headers.authorization;
-    // console.log(tokenData)
-    try {
-        const admin = req.data.payload.role;
-        console.log(`admin =>>> ${admin}`);
-        if(admin == 1) {
-            next();
-        } else {
-            res.status(403).json("Sorry, only admins can access")
-        }
-    } catch(error) {
-        console.error(error);
-    }
-}
+//         const verification = jwt.verify(token, jwtKey);
+//         // console.log(verification.payload.admin)
+//         req.data = verification;
+//         next()
+//     } catch(error) {
+//         console.error(error)
+//     }
+// }
+// const isAdmin = async(req, res, next) => {
+//     // const tokenData = req.headers.authorization;
+//     // console.log(tokenData)
+//     try {
+//         const admin = req.data.payload.role;
+//         console.log(`admin =>>> ${admin}`);
+//         if(admin == 1) {
+//             next();
+//         } else {
+//             res.status(403).json("Sorry, only admins can access")
+//         }
+//     } catch(error) {
+//         console.error(error);
+//     }
+// }
 /*** GET dishes ***/
-router.get("/dishes", jwtVerification, async (req, res) => {
+const checkAdmin = async(req, res, next) => {
+    /* This is what comes in the payload (admin == 1, customer == 0)
+        user: {
+            payload: { user: 'Nicole Lepariz', role: 0 },
+            iat: 1655393607,
+            exp: 1655397207
+        },
+    */
+   try {
+    const payload = req.user.payload;
+    console.log(payload);
+    const role = req.user.payload.role;
+    if(role == 1) {
+        next();
+    } else {
+        res.status(403).json("Sorry, only admins have access")
+    }
+   } catch(error) {
+        console.error(error);
+   }
+}
+router.get("/dishes", checkAdmin, async (req, res) => {
     try {
         const records = await sequelize.query(
             "SELECT * FROM dishes", { type: sequelize.QueryTypes.SELECT }
@@ -94,7 +124,7 @@ const getDish = async(name) => {
     return productID;
 }
 /*** PUT (update) a dish ***/
-router.put("/dishes", verifyDish, jwtVerification, isAdmin, async (req, res) => {
+router.put("/dishes", verifyDish, async (req, res) => {
     const { name, image, price } = req.body;
     try {
         const dishID = await getDish(req.body.name);
