@@ -5,10 +5,37 @@ const expressJwt = require("express-jwt");
 const jwtKey = process.env.JWTKEY;
 const router = express.Router();
 
-router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/", "/login", "/signup" ] }));
-
+// router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/", "/login", "/signup" ] }));
+//Middleware to verify if user is admin
+const jwtVerification = async(req, res, next) => {
+    const token = req.headers.authorization.split(" ")[1];
+    try {
+        
+        const verification = jwt.verify(token, jwtKey);
+        // console.log(verification.payload.admin)
+        req.data = verification;
+        next()
+    } catch(error) {
+        console.error(error)
+    }
+}
+const isAdmin = async(req, res, next) => {
+    // const tokenData = req.headers.authorization;
+    // console.log(tokenData)
+    try {
+        const admin = req.data.payload.role;
+        console.log(`admin =>>> ${admin}`);
+        if(admin == 1) {
+            next();
+        } else {
+            res.status(403).json("Sorry, only admins can access")
+        }
+    } catch(error) {
+        console.error(error);
+    }
+}
 /*** GET dishes ***/
-router.get("/dishes", async (req, res) => {
+router.get("/dishes", jwtVerification, async (req, res) => {
     try {
         const records = await sequelize.query(
             "SELECT * FROM dishes", { type: sequelize.QueryTypes.SELECT }
@@ -67,7 +94,7 @@ const getDish = async(name) => {
     return productID;
 }
 /*** PUT (update) a dish ***/
-router.put("/dishes", verifyDish, async (req, res) => {
+router.put("/dishes", verifyDish, jwtVerification, isAdmin, async (req, res) => {
     const { name, image, price } = req.body;
     try {
         const dishID = await getDish(req.body.name);

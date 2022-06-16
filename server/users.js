@@ -5,8 +5,8 @@ const expressJwt = require("express-jwt");
 const jwtKey = process.env.JWTKEY;
 const router = express.Router();
 
-//algorithms: ["RS256"]
-router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/login"] }));
+// //algorithms: ["RS256"]
+// router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/login"] }));
 
 //Loging with username and password
 // sequelize.query('INSERT INTO`restaurant`(`ID_USER`, `NOM_RESTO`, `ADRESSE`) VALUES(?, ?, ?)',
@@ -31,14 +31,30 @@ const verifyUser = async (req, res, next) => {
         res.status(404).send("You need to insert your name and password");
     }
 }
+//Middleware to verify if user is admin
+const isAdmin = async(req, res) => {
+    const data = await sequelize.query("SELECT * FROM usuarios WHERE email = ?", {replacements: [req.body.email], type: sequelize.QueryTypes.SELECT,})
+    console.log(data[0].Admin)
+    const admin = data[0].Admin;
+}
 //**LOGIN**
 router.post("/login", verifyUser, async (req, res) => {
     const email = req.body.email;
+
     try {
-        await sequelize.query("SELECT * FROM usuarios WHERE email = ?", {replacements: [req.body.email],type: sequelize.QueryTypes.SELECT,})
-        const token = jwt.sign({
-            email: email
-        }, jwtKey, { expiresIn: "1h" },);
+        const data = await sequelize.query("SELECT * FROM usuarios WHERE email = ?", {replacements: [req.body.email], type: sequelize.QueryTypes.SELECT,})
+        console.log(data[0].Admin);
+        console.log(data[0].Name);
+
+        const user = req.body;
+
+        const username = data[0].Name;
+        const admin = data[0].Admin;
+        const payload = {
+            user: username,
+            role: admin
+        }
+        const token = jwt.sign({payload}, jwtKey, { expiresIn: "1h" });
         res.status(200).json({
             token
         });
