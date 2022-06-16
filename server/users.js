@@ -29,16 +29,23 @@ router.get("/users", checkAdmin, async (req, res) => {
         console.error(error);
     }      
   });
-router.get("/users:id", checkAdmin, async (req, res) => {
-    const id = req.params.id;
-    if (req.params.id != null) {
-        try {
-            const records = await sequelize.query("SELECT * FROM usuarios WHERE id = ?", { replacements: {id: id}, type: sequelize.QueryTypes.SELECT })
-            res.status(200).json(records);
-        } catch (error) {
-            console.error(error);
-        }   
-    }
+router.get("/users/:id", checkAdmin, async (req, res) => {
+        const user_id = req.params.id;
+        if(req.params.id != null) {
+            try {
+                const records = await sequelize.query("SELECT * FROM usuarios WHERE id = :id", { replacements: {id: user_id}, type: sequelize.QueryTypes.SELECT })
+                console.log(records)
+                if(records.length == 0) {
+                    res.status(404).json("ID doesn't exist")
+                } else {
+                    res.status(200).json(records)
+                }
+                // records !== [] ? res.status(200).json(records) : res.status(404);
+            } catch (error) {
+                console.error(error);
+                res.status(404);
+            }   
+        } 
 })
 router.post("/login", verifyUser, async (req, res) => {
     const email = req.body.email;
