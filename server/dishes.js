@@ -4,10 +4,13 @@ const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
 const jwtKey = process.env.JWTKEY;
 const router = express.Router();
+const {
+    checkAdmin,
+    verifyDish,
+    getDish
+} = require("../utils/utils.js");
 
-router.use(
-    expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/", "/login", "/signup" ] }),
-);
+router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/", "/login", "/signup" ] }));
 router.use(function (err, req, res, next) {
     if (err.name === "UnauthorizedError") {
         res.status(401).send("You need to sign in or sign up");
@@ -15,57 +18,9 @@ router.use(function (err, req, res, next) {
         next(err);
     }
 })
-//Middleware to verify if user is admin
-// const jwtVerification = async(req, res, next) => {
-//     const token = req.headers.authorization.split(" ")[1];
-//     try {
-        
-//         const verification = jwt.verify(token, jwtKey);
-//         // console.log(verification.payload.admin)
-//         req.data = verification;
-//         next()
-//     } catch(error) {
-//         console.error(error)
-//     }
-// }
-// const isAdmin = async(req, res, next) => {
-//     // const tokenData = req.headers.authorization;
-//     // console.log(tokenData)
-//     try {
-//         const admin = req.data.payload.role;
-//         console.log(`admin =>>> ${admin}`);
-//         if(admin == 1) {
-//             next();
-//         } else {
-//             res.status(403).json("Sorry, only admins can access")
-//         }
-//     } catch(error) {
-//         console.error(error);
-//     }
-// }
-/*** GET dishes ***/
-const checkAdmin = async(req, res, next) => {
-    /* This is what comes in the payload (admin == 1, customer == 0)
-        user: {
-            payload: { user: 'Nicole Lepariz', role: 0 },
-            iat: 1655393607,
-            exp: 1655397207
-        },
-    */
-   try {
-    const payload = req.user.payload;
-    console.log(payload);
-    const role = req.user.payload.role;
-    if(role == 1) {
-        next();
-    } else {
-        res.status(403).json("Sorry, only admins have access")
-    }
-   } catch(error) {
-        console.error(error);
-   }
-}
-router.get("/dishes", checkAdmin, async (req, res) => {
+
+
+router.get("/dishes", async (req, res) => {
     try {
         const records = await sequelize.query(
             "SELECT * FROM dishes", { type: sequelize.QueryTypes.SELECT }
@@ -79,9 +34,7 @@ router.get("/dishes", checkAdmin, async (req, res) => {
             console.error(error);
         }
 })
-
-/*** POST dishes ***/
-router.post("/dishes", async (req, res) => {
+router.post("/dishes", checkAdmin, async (req, res) => {
     const { name, image, price } = req.body;
     try {
         if (name && image && price) {
@@ -97,34 +50,7 @@ router.post("/dishes", async (req, res) => {
         console.error(error);
     }
 })
-//Verify Dish
-const verifyDish = async (req, res, next) => {
-    if(req.body.name != null) {
-        try {
-            const records = await sequelize.query("SELECT * FROM dishes WHERE name = ?", { replacements: [req.body.name], type: sequelize.QueryTypes.SELECT})
-            if(records[0]) {
-                next();
-            } else if (records[0] == null) {
-                res.status(404).send("Dish not found :v");
-            }
-        } catch(error) {
-            console.error(error);
-        }
-    } else {
-        res.status(404).json("You need to insert the name of the dish")
-    }
-}
-// Function to get the dish data
-const getDish = async(name) => {
-    const product = await sequelize.query(
-        "SELECT id FROM dishes WHERE name = ?", { replacements: [name], type: sequelize.QueryTypes.SELECT, }
-    )
-    const productID = product[0].id;
-    console.log(product)
-    return productID;
-}
-/*** PUT (update) a dish ***/
-router.put("/dishes", verifyDish, async (req, res) => {
+router.put("/dishes", verifyDish, checkAdmin, async (req, res) => {
     const { name, image, price } = req.body;
     try {
         const dishID = await getDish(req.body.name);
@@ -141,9 +67,7 @@ router.put("/dishes", verifyDish, async (req, res) => {
         console.error(error);
     }
 })
-
-/**DELETE**/
-router.delete("/deletedish", verifyDish, async(req, res) => {
+router.delete("/deletedish", verifyDish, checkAdmin, async(req, res) => {
     try {
         const dishID = await getDish(req.body.name);
         const deleteDish = await sequelize.query(

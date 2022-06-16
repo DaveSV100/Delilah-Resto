@@ -14,6 +14,7 @@ const cors = require("cors");
 const corsOptions = {
     origin: "http://127.0.0.1:3000",
 }
+
 app.use(compression());
 app.use(helmet());
 app.use(bodyParser.json());
