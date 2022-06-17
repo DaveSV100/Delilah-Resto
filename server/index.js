@@ -14,6 +14,9 @@ const cors = require("cors");
 const corsOptions = {
     origin: "http://127.0.0.1:3000",
 }
+const userRoute = require("./users.js");
+const dishes = require("./dishes.js");
+const orders = require("./orders.js");
 
 app.use(compression());
 app.use(helmet());
@@ -21,10 +24,11 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors(corsOptions));
 
-const userRoute = require("./users.js");
-const dishes = require("./dishes.js");
-app.use("/", userRoute);
+//Routes
+app.use("/", userRoute);  
 app.use("/", dishes);
+app.use("/", orders);
+
 //algorithms: ["RS256"]
 app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/", "/login", "/signup" ] }));
 //Port listener
@@ -32,6 +36,7 @@ app.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
 
+//Home endpoint
 app.get("/", (req, res) => {
   res.status(200).send("Bienvenido a Delilah Resto");
 });
