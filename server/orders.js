@@ -36,6 +36,17 @@ router.get("/order", async (req, res) => {
   }
 });
 
+router.get("/order/list", checkAdmin, async (req, res) => {
+  try {
+    const records = await sequelize.query(
+      "SELECT * FROM Orders INNER JOIN usuarios ON Orders.User_id = usuarios.id", { type: sequelize.QueryTypes.SELECT }
+    )
+    records ? res.status(200).json(records) : res.status(404);
+  } catch (error) {
+    console.error(error);
+  }
+})
+
 router.post("/order", verifyDish, async (req, res) => {
   //ID, STATUS, DATE, TIME, DESCRIPTION, PAYMENT, USER
   const { name, payment } = req.body;
@@ -54,7 +65,7 @@ router.post("/order", verifyDish, async (req, res) => {
       { replacements: {
         status: "New",
         date: date,
-        description: name,
+        description: dish_id,
         payment: payment,
         user_id: userId,
       } }

@@ -61,7 +61,7 @@ router.put("/dishes", verifyDish, checkAdmin, async (req, res) => {
             )
             res.status(200).json("Dish updated");
         } else {
-            res.status(404)
+            res.status(404);
         }
     } catch(error) {
         console.error(error);
