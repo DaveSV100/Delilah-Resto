@@ -80,11 +80,22 @@ const getDish = async(name) => {
     console.log(product)
     return productID;
 }
+//Function to get the Order ID
+const getOrder = async (dishId, userId) => {
+    const records = await sequelize.query(
+      "SELECT id FROM Orders WHERE Dish_id = ? AND User_id = ?", {
+        replacements: [dishId, userId], type: sequelize.QueryTypes.SELECT
+      }
+    )
+    const id = records[0].id;
+    return id;
+  }
 module.exports = {
     checkAdmin,
     verifyUser,
     existingUser,
     getID,
     verifyDish,
-    getDish
+    getDish,
+    getOrder
 };
