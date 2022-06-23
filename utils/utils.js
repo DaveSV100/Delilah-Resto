@@ -56,9 +56,9 @@ const getID = async(user_email) => {
 
 //Verify Dish
 const verifyDish = async (req, res, next) => {
-    if(req.body.name != null) {
+    if(req.body.description != null) {
         try {
-            const records = await sequelize.query("SELECT * FROM dishes WHERE name = ?", { replacements: [req.body.name], type: sequelize.QueryTypes.SELECT})
+            const records = await sequelize.query("SELECT * FROM dishes WHERE description = ?", { replacements: [req.body.description], type: sequelize.QueryTypes.SELECT})
             if(records[0]) {
                 next();
             } else if (records[0] == null) {
@@ -68,13 +68,13 @@ const verifyDish = async (req, res, next) => {
             console.error(error);
         }
     } else {
-        res.status(404).json("You need to insert the name of the dish")
+        res.status(404).json("You need to insert the description of the dish")
     }
 }
 // Function to get the dish data
 const getDish = async(name) => {
     const product = await sequelize.query(
-        "SELECT id FROM dishes WHERE name = ?", { replacements: [name], type: sequelize.QueryTypes.SELECT, }
+        "SELECT id FROM dishes WHERE description = ?", { replacements: [description], type: sequelize.QueryTypes.SELECT, }
     )
     const productID = product[0].id;
     console.log(product)

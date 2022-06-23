@@ -35,12 +35,12 @@ router.get("/dishes", async (req, res) => {
         }
 })
 router.post("/dishes", checkAdmin, async (req, res) => {
-    const { name, image, price } = req.body;
+    const { description, image, price } = req.body;
     try {
-        if (name && image && price) {
+        if (description && image && price) {
             const newProduct = await sequelize.query(
-                "INSERT INTO dishes (Name, Image, Price) VALUES (:name, :image, :price)",
-                { replacements: { name, image, price } }
+                "INSERT INTO dishes (Description, Image, Price) VALUES (:description, :image, :price)",
+                { replacements: { description, image, price } }
             )
             res.status(200).json("New dish added correctly");
         } else {
@@ -51,13 +51,13 @@ router.post("/dishes", checkAdmin, async (req, res) => {
     }
 })
 router.put("/dishes", verifyDish, checkAdmin, async (req, res) => {
-    const { name, image, price } = req.body;
+    const { description, image, price } = req.body;
     try {
-        const dishID = await getDish(req.body.name);
+        const dishID = await getDish(req.body.description);
         if(dishID != "") {
             const updateDish = await sequelize.query(
-                "UPDATE dishes SET name = :name, image = :image, price = :price WHERE id = :id",
-                { replacements: {name, image, price, id: dishID} }
+                "UPDATE dishes SET description = :description, image = :image, price = :price WHERE id = :id",
+                { replacements: {description, image, price, id: dishID} }
             )
             res.status(200).json("Dish updated");
         } else {
@@ -69,7 +69,7 @@ router.put("/dishes", verifyDish, checkAdmin, async (req, res) => {
 })
 router.delete("/deletedish", verifyDish, checkAdmin, async(req, res) => {
     try {
-        const dishID = await getDish(req.body.name);
+        const dishID = await getDish(req.body.description);
         const deleteDish = await sequelize.query(
             "DELETE FROM dishes WHERE id = :id",
             { replacements: {id: dishID} }

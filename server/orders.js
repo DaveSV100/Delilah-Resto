@@ -52,12 +52,12 @@ router.get("/order/list", checkAdmin, async (req, res) => {
 
 router.post("/order", verifyDish, async (req, res) => {
   //ID, STATUS, DATE, TIME, DESCRIPTION, PAYMENT, USER
-  const { name, payment } = req.body;
+  const { description, payment } = req.body;
   const userId = req.user.payload.id;
   try {
     const date = new Date();
     console.log(date);
-    const dishId = await getDish(name);
+    const dishId = await getDish(description);
     const makeOrder = await sequelize.query(
       "INSERT INTO orders (Status, Date, Dish_id, User_id, Payment) VALUES (:status, :date, :dish_id, :user_id, :payment)",
       { replacements: {
