@@ -72,7 +72,7 @@ const verifyDish = async (req, res, next) => {
     }
 }
 // Function to get the dish data
-const getDish = async(name) => {
+const getDish = async(description) => {
     const product = await sequelize.query(
         "SELECT id FROM dishes WHERE description = ?", { replacements: [description], type: sequelize.QueryTypes.SELECT, }
     )
