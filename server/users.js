@@ -23,7 +23,7 @@ router.use(function (err, req, res, next) {
 
 router.get("/users", checkAdmin, async (req, res) => {
     try {
-        const records = await sequelize.query("SELECT * FROM usuarios", { type: sequelize.QueryTypes.SELECT })
+        const records = await sequelize.query("SELECT * FROM users", { type: sequelize.QueryTypes.SELECT })
         res.status(200).json(records);
     } catch (error) {
         res.status(400).json(`Error message: ${error}`)
@@ -34,7 +34,7 @@ router.get("/users/:id", checkAdmin, async (req, res) => {
         const user_id = req.params.id;
         if(req.params.id != null) {
             try {
-                const records = await sequelize.query("SELECT * FROM usuarios WHERE id = :id", { replacements: {id: user_id}, type: sequelize.QueryTypes.SELECT })
+                const records = await sequelize.query("SELECT * FROM users WHERE id = :id", { replacements: {id: user_id}, type: sequelize.QueryTypes.SELECT })
                 console.log(records)
                 if(records.length == 0) {
                     res.status(404).json("ID doesn't exist")
@@ -51,7 +51,7 @@ router.get("/users/:id", checkAdmin, async (req, res) => {
 router.post("/users/login", verifyUser, async (req, res) => {
     const email = req.body.email;
     try {
-        const data = await sequelize.query("SELECT * FROM usuarios WHERE email = ?", {replacements: [req.body.email], type: sequelize.QueryTypes.SELECT,})
+        const data = await sequelize.query("SELECT * FROM users WHERE email = ?", {replacements: [req.body.email], type: sequelize.QueryTypes.SELECT,})
         console.log(data[0].Admin);
         console.log(data[0].Name);
         console.log(data[0].id);
@@ -77,7 +77,7 @@ router.post("/users/signup", existingUser, async (req, res) => {
     try {
         if (name && email && password && direction) {
             const add = await sequelize.query(
-                "INSERT INTO usuarios (Name, Email, Password, Direction) VALUES (:name, :email, :password, :direction)",
+                "INSERT INTO users (Name, Email, Password, Direction) VALUES (:name, :email, :password, :direction)",
                 { replacements: {name, email, password, direction } }
             )
             res.status(200).json("User added");
@@ -97,7 +97,7 @@ router.put("/users", verifyUser, async(req, res) => {
             //The next const calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
             const user_id = await getID(req.body.email);
             const update = await sequelize.query(
-                "UPDATE usuarios SET name = :name, email = :email, password = :password, direction = :direction, admin = :admin WHERE id = :id",
+                "UPDATE users SET name = :name, email = :email, password = :password, direction = :direction, admin = :admin WHERE id = :id",
                 { replacements: {name, email, password, direction, admin, id: user_id} }
             )
             res.status(200).json(`User updated corrrectly`);
@@ -111,7 +111,7 @@ router.put("/users", verifyUser, async(req, res) => {
             //Those who are not admins can only make changes in their own ID not in the id of others. The id is taken from the "payload" which was created when the token was generated.
             const user_id = await req.user.payload.id;
             const update = await sequelize.query(
-                "UPDATE usuarios SET name = :name, email = :email, password = :password, direction = :direction WHERE id = :id",
+                "UPDATE users SET name = :name, email = :email, password = :password, direction = :direction WHERE id = :id",
                 { replacements: {name, email, password, direction, id: user_id} }
             )
             res.status(200).json(`User updated corrrectly`);
@@ -128,7 +128,7 @@ router.delete("/users", verifyUser, async(req, res) => {
             //The next const calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
             const user_id = await getID(req.body.email);
             const deleteUser = await sequelize.query(
-                "DELETE FROM usuarios WHERE id = :id",
+                "DELETE FROM users WHERE id = :id",
                 { replacements: {id: user_id} }
             )
             res.status(200).json("User removed");
@@ -141,7 +141,7 @@ router.delete("/users", verifyUser, async(req, res) => {
             //Those who are not admins can only make changes in their own ID not in the id of others. The id is taken from the "payload" which was created when the token was generated.
             const user_id = await req.user.payload.id;
             const deleteUser = await sequelize.query(
-                "DELETE FROM usuarios WHERE id = :id",
+                "DELETE FROM users WHERE id = :id",
                 { replacements: {id: user_id} }
             )
             res.status(200).json("User removed");

@@ -40,9 +40,9 @@ router.get("/order", async (req, res) => {
 router.get("/order/list", checkAdmin, async (req, res) => {
   try {
     const records = await sequelize.query(
-      //"SELECT Orders.ID, Orders.Status, Orders.Date, Orders.Description, Orders.Payment, usuarios.name, usuarios.email, usuarios.direction, usuarios.admin FROM Orders INNER JOIN usuarios ON Orders.User_id = usuarios.id ORDER BY date ASC", { type: sequelize.QueryTypes.SELECT }
-      //"SELECT * FROM Orders INNER JOIN dishes ON Orders.Dish_id = dishes.id INNER JOIN usuarios ON Orders.User_id = Usuarios.id", { type: sequelize.QueryTypes.SELECT }
-      "SELECT Orders.status, Dishes.Image, Usuarios.Name FROM Orders INNER JOIN orders_dishes ON Orders.ID = Orders_dishes.Order_id INNER JOIN Dishes ON Orders_dishes.Dish_id = Dishes.id INNER JOIN Usuarios ON Orders.User_id = Usuarios.id"
+      //"SELECT Orders.ID, Orders.Status, Orders.Date, Orders.Description, Orders.Payment, users.name, users.email, users.direction, users.admin FROM Orders INNER JOIN users ON Orders.User_id = users.id ORDER BY date ASC", { type: sequelize.QueryTypes.SELECT }
+      //"SELECT * FROM Orders INNER JOIN dishes ON Orders.Dish_id = dishes.id INNER JOIN users ON Orders.User_id = users.id", { type: sequelize.QueryTypes.SELECT }
+      "SELECT Orders.status, Dishes.Image, users.Name FROM Orders INNER JOIN orders_dishes ON Orders.ID = Orders_dishes.Order_id INNER JOIN Dishes ON Orders_dishes.Dish_id = Dishes.id INNER JOIN users ON Orders.User_id = users.id"
       )
     records ? res.status(200).json(records) : res.status(404);
   } catch (error) {
