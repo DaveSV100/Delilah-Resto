@@ -154,3 +154,30 @@ router.delete("/users", verifyUser, async(req, res) => {
 
 //Export routes
 module.exports = router;
+
+/*
+
+securityDefinitions:
+  bearerAuth:
+    name: JsonWebToken
+    type: Token 
+    format: JWT
+    in: header
+    description: It must have the word "Bearer " (string) plus the token (string)
+  adminAuth:
+    type: oauth2
+    authorizationUrl: /users/login
+    flow: implicit
+    scopes:
+      write:dishes: modify dishes (products)
+      write:orders: modify order
+      write:users: modify users
+
+        security:
+        - bearerAuth:
+          $ref: '#/securityDefinitions/bearerAuth' 
+        - adminAuth:
+          $ref: '#/securityDefinitions/adminAuth'
+
+
+*/

@@ -67,7 +67,7 @@ router.get("/orders", async (req, res) => {
   }
 })
 
-router.post("/orders", async (req, res) => {
+router.post("/orders", verifyDish, async (req, res) => {
   //ID, STATUS, DATE, TIME, DESCRIPTION, PAYMENT, USER
   const { description, payment } = req.body;
   const userId = req.user.payload.id;
@@ -76,7 +76,6 @@ router.post("/orders", async (req, res) => {
     if(typeof description == "object") {
       description.forEach(async(element) => {
         const dishId = await getDish(element);
-        console.log(dishId);
         const makeOrder = await sequelize.query(
           "INSERT INTO orders (Status, Date, Dish_id, User_id, Payment) VALUES (:status, :date, :dish_id, :user_id, :payment)",
           { replacements: {
@@ -124,7 +123,7 @@ router.post("/orders", async (req, res) => {
     res.status(200).json("Your order has been made succesfully, you can follow it");
   } catch (error) {
     console.error(error);
-    res.status(400);
+    res.status(400).json("Error " + error);
   }
 });
 
@@ -156,6 +155,7 @@ router.delete("/orders", checkAdmin, async (req, res) => {
     )
     res.status(200).json("Order deleated successfully");
   } catch(error) {
+    res.status(404).json("Order not found. Error message: " + error)
     console.error(error);
   }
 })

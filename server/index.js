@@ -46,7 +46,7 @@ app.use((req, res, next) => {
   useResponse = {
     error: true,
     code: 404,
-    message: "Not found",
+    message: "Url not found",
   };
   res.status(404).send(useResponse);
 });
