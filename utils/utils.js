@@ -4,7 +4,7 @@ const checkAdmin = async(req, res, next) => {
     /* This is what comes in the payload (admin == 1, customer == 0) =>>> user: { payload: { user: 'Nicole Lepariz', role: 0 },iat: 1655393607,exp: 1655397207},*/
     try {
         const role = req.user.payload.role;
-        role == 1 ? next() : res.status(401).json("Sorry, only admins have access");
+        role == 1 ? next() : res.status(403).json("Sorry, only admins have access");
     } catch(error) {
         res.stauts(404).json("Error message: " + error)
         console.error(error);
@@ -76,12 +76,16 @@ const verifyDish = async (req, res, next) => {
 }
 // Function to get the dish data
 const getDish = async(description) => {
-    const product = await sequelize.query(
-        "SELECT id FROM dishes WHERE description = ?", { replacements: [description], type: sequelize.QueryTypes.SELECT, }
-    )
-    const productID = product[0].id;
-    console.log(product)
-    return productID;
+    try {
+        const product = await sequelize.query(
+            "SELECT id FROM dishes WHERE description = ?", { replacements: [description], type: sequelize.QueryTypes.SELECT, }
+        )
+        console.log(product);
+        const productID = product[0].id;
+        return productID;
+    } catch(error) {
+        console.error(error);
+    }
 }
 //Function to get the Order ID
 const getOrder = async (dishId, userId) => {

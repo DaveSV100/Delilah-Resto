@@ -12,7 +12,7 @@ const {
   } = require("../utils/utils");
 
 // //algorithms: ["RS256"]
-router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/signup", "/login"] }));
+router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/signup", "/users/login"] }));
 router.use(function (err, req, res, next) {
     if (err.name === "UnauthorizedError") {
         res.status(401).send("You need to sign in or sign up");
