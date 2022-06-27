@@ -303,9 +303,9 @@ paths:
       summary: Create a new dish
       description: Every user can create a new order
       parameters:
-      - name: New_dish
-        in: body
-        description: New dish data
+      - in: body
+        name: body
+        description: New order data. 
         required: true
         schema:
           $ref: '#/definitions/new_dish'
