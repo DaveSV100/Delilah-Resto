@@ -160,10 +160,6 @@ paths:
               $ref: '#definitions/ok'
         400:
           description: Incomplete form
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
   /dishes:
     get:
         tags:
@@ -172,43 +168,107 @@ paths:
         description: All the users have access to the products list
         produces:
         - application/json
-        parameters:
-        - in: header
-        name: authorization
-        type: string
-        description: Token. In the authorization header it must have the word "bearer" precided by the token
-        required: true
-        security:
-        - users_auth:
-          - write:admin
-          - read:user
-        deprecated: true
         responses:
-          "200":
+          200:
             description: successful operation
             schema:
               type: array
               items:
                 $ref: '#/definitions/dish'
-          "404":
-            description: Bad request
-          "401": 
-            description: Unathorized acces, you need to sign in or sign up
-          "404":
+          401: 
+            description: Unathorized access, you need to sign in or sign up
+          404:
             description: Invalid request
+        security:
+        - token:
+          $ref: '#/securityDefinitions/token'
+    post:
+      tags:
+      - Dishes
+      summary: Create a new dish
+      description: Only admins are allowed to create a new product
+      parameters:
+      - name: New_dish
+        in: body
+        description: New dish data
+        required: true
+        schema:
+          $ref: '#/definitions/new_dish'
       responses:
         200:
-          description: successful operation
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Pet'
+            description: successful operation
+            schema:
+              type: string
+              $ref: '#definitions/ok'
         400:
-          description: Invalid status value
+          description: Incomplete form
+        401: 
+          description: Unathorized. Only admins have access
       security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
+        - token:
+          $ref: '#/securityDefinitions/token'
+    put:
+      tags:
+      - Dishes
+      summary: Update an existing dish
+      description: Admins can modify any dish
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: new_dish
+        in: body
+        description: New dish object. At least it must have the description field in order to get the product that will be modified
+        required: true
+        schema:
+          $ref: '#/definitions/new_dish'
+      responses:
+        200: 
+          description: successful operation
+            schema: 
+              type: array
+                items:
+                  $ref: '#/definitions/ok'
+        400:
+          description: Bad request. Missing arguments
+        401: 
+          description: Unathorized. Only admins have access
+        404:
+          description: Dish not found
+      security:
+        - token:
+          $ref: '#/securityDefinitions/token'
+    delete:
+      tags:
+      - Dishes
+      summary: Delete dish
+      description: Administrators can delete the dishes
+      produces:
+      - application/json
+      parameters:
+      - name: description
+        in: body
+        description: Name of the dish in the "description" field
+        required: true
+        schema:
+          $ref: '#/definitions/Delete_dish'
+      responses:
+        200
+          description: successful operation
+            schema: 
+              type: array
+                items:
+                  $ref: '#/definitions/ok'
+        400:
+          description: Invalid data
+        401: 
+          description: Unathorized. Only admins have access
+        404:
+          description: Dish not found
+      security:
+        - token:
+          $ref: '#/securityDefinitions/token'
   /pet/findByTags:
     get:
       tags:
@@ -733,26 +793,24 @@ definitions:
       price:
         type: number
         format: int64
-  Tag:
+  New_dish:
     type: object
     properties:
-      id:
-        type: integer
-        format: int64
-      name:
+      description:
         type: string
-    xml:
-      name: Tag
-  Tag:
+        format: varchar255
+      image:
+        type: string
+        format: text
+      price:
+        type: number
+        format: int64
+  Delete_dish: 
     type: object
-    properties:
-      id:
-        type: integer
-        format: int64
-      name:
+    propereties:
+      description: 
         type: string
-    xml:
-      name: Tag
+        format: varchar255
   Pet:
     type: object
     required:

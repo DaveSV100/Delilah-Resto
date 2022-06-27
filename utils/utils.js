@@ -6,6 +6,7 @@ const checkAdmin = async(req, res, next) => {
         const role = req.user.payload.role;
         role == 1 ? next() : res.status(401).json("Sorry, only admins have access");
     } catch(error) {
+        res.stauts(404).json("Error message: " + error)
         console.error(error);
     }
 }
@@ -66,6 +67,7 @@ const verifyDish = async (req, res, next) => {
                 res.status(404).send("Dish not found :v");
             }
         } catch(error) {
+            res.status(400).json("Error message: " + error)
             console.error(error);
         }
     } else {

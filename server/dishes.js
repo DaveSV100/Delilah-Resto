@@ -68,7 +68,7 @@ router.put("/dishes", verifyDish, checkAdmin, async (req, res) => {
         console.error(error);
     }
 })
-router.delete("/deletedish", verifyDish, checkAdmin, async(req, res) => {
+router.delete("/dishes", verifyDish, checkAdmin, async(req, res) => {
     try {
         const dishID = await getDish(req.body.description);
         const deleteDish = await sequelize.query(
