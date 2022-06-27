@@ -1,93 +1,201 @@
 swagger: '2.0'
 info:
-  description: |
-    This is a restaurant website from the backend side
+  description: This is a restaurant website from the backend side.
   version: 1.0.0
   title: Delilah Resto
   contact:
     email: davidsv20@icloud.com
     url: https://github.com/DaveSV100/delilah-resto.git
 tags:
-- name: Users
+- name: home
+  description: Homepage
+- name: users
   description: Users of Delilah Resto
-- name: Dishes
+- name: dishes
   description: Dishes from our restaurant
-- name: Orders
+- name: orders
   description: Orders taken
 paths:
-  /inicio:
+  /users:
+    get:
+        tags:
+        - users
+        summary: List of users
+        description: Returns all the users (only admins have access)
+        produces:
+        - application/json
+        responses:
+          200:
+            description: successful operation
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/user'
+          400:
+            description: Bad request
+          401: 
+            description: Unauthorized
+        security:
+        - token:
+          $ref: '#/securityDefinitions/token'
+    put:
+      tags:
+      - users
+      summary: Update an existing user
+      description: If it's an admin it'll make use of the user object format but if it's a normal user it'll utilize the client_user format
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: user data
+        in: body
+        description: User data
+        required: true
+        schema:
+          $ref: '#/definitions/client_user'
+          $ref: '#/definitions/user'
+      responses:
+        200: 
+          description: successful operation
+            schema: 
+              type: array
+                items:
+                  $ref: '#/definitions/ok'
+        400:
+          description: Bad request. Missing arguments
+        404:
+          description: User not found
+      security:
+        - token:
+          $ref: '#/securityDefinitions/token'
+    delete:
+      tags:
+      - user
+      summary: Delete user
+      description: A normal user can delete only his own account. Admins can insert the email of an especific account to be deleted
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Email
+        required: true
+        schema:
+          $ref: '#/definitions/user_email'
+      responses:
+        200
+          description: User removed
+        400:
+          description: Invalid data
+        404:
+          description: User not found
+  /users/{id}:
+    get:
+      tags:
+      - users
+      summary: Gets a user by id
+      description: It returns the data of a user by the id provided in the parameters. Only for admis
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: ID of user
+        required: true
+        type: integer
+        format: int64
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/user'
+        400:
+          description: Invalid ID supplied
+        401:
+          description: Unauthorized
+        404:
+          description: User not found
+  /users/login:
+    post:
+      tags:
+      - users
+      summary: Logs user into the system and provides a token with a payload indicating the data of user
+      produces:
+      - application/json
+      parameters:
+      - name: user data
+        in: body
+        description: User data
+        required: true
+        schema:
+          $ref: '#/definitions/user_data'
+      responses:
+        200:
+          description: successful operation. Token signed
+          schema:
+            type: string
+            $ref: '#definitions/Token_res'
+        400:
+          description: Invalid input
+        404: 
+          description: User not found
+  /users/signup:
     post:
       tags:
       - Users
-      summary: Login or signup
-      operationId: login
+      summary: Create a new account
       parameters:
-      - in: body
-        name: body
-        description: Form  to sign in and sign up button in case that the client does not have an account yet
+      - name: New_data
+        in: body
+        description: New data to sign up
         required: true
         schema:
-          $ref: '#/definitions/Pet'
+          $ref: '#/definitions/new_user'
       responses:
-        405:
-          description: Invalid input
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
-    put:
-      tags:
-      - pet
-      summary: Update an existing pet
-      operationId: updatePet
-      consumes:
-      - application/json
-      - application/xml
-      produces:
-      - application/json
-      - application/xml
-      parameters:
-      - in: body
-        name: body
-        description: Pet object that needs to be added to the store
-        required: true
-        schema:
-          $ref: '#/definitions/Pet'
-      responses:
+        200:
+            description: successful operation
+            schema:
+              type: string
+              $ref: '#definitions/ok'
         400:
-          description: Invalid ID supplied
-        404:
-          description: Pet not found
-        405:
-          description: Validation exception
+          description: Incomplete form
       security:
       - petstore_auth:
         - write:pets
         - read:pets
-  /pet/findByStatus:
+  /dishes:
     get:
-      tags:
-      - pet
-      summary: Finds Pets by status
-      description: Multiple status values can be provided with comma separated strings
-      operationId: findPetsByStatus
-      produces:
-      - application/json
-      - application/xml
-      parameters:
-      - name: status
-        in: query
-        description: Status values that need to be considered for filter
+        tags:
+        - Dishes
+        summary: Show list of dishes
+        description: All the users have access to the products list
+        produces:
+        - application/json
+        parameters:
+        - in: header
+        name: authorization
+        type: string
+        description: Token. In the authorization header it must have the word "bearer" precided by the token
         required: true
-        type: array
-        items:
-          type: string
-          enum:
-          - available
-          - pending
-          - sold
-          default: available
-        collectionFormat: multi
+        security:
+        - users_auth:
+          - write:admin
+          - read:user
+        deprecated: true
+        responses:
+          "200":
+            description: successful operation
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/dish'
+          "404":
+            description: Bad request
+          "401": 
+            description: Unathorized acces, you need to sign in or sign up
+          "404":
+            description: Invalid request
       responses:
         200:
           description: successful operation
@@ -517,27 +625,12 @@ paths:
           description: Invalid user supplied
         404:
           description: User not found
-    delete:
-      tags:
-      - user
-      summary: Delete user
-      description: This can only be done by the logged in user.
-      operationId: deleteUser
-      produces:
-      - application/json
-      - application/xml
-      parameters:
-      - name: username
-        in: path
-        description: The name that needs to be deleted
-        required: true
-        type: string
-      responses:
-        400:
-          description: Invalid username supplied
-        404:
-          description: User not found
 securityDefinitions:
+  token:
+    name: Bearer token
+    type: Token
+    in: header
+    description: It must have the word "Bearer " (string) plus the token (string)
   petstore_auth:
     type: oauth2
     authorizationUrl: http://petstore.swagger.io/oauth/dialog
@@ -550,34 +643,97 @@ securityDefinitions:
     name: api_key
     in: header
 definitions:
-  Order:
+  Token_res: 
+    type: object
+    properties:
+      message: 
+        type: string
+      token: 
+        type: string
+  OK: 
+    type: object
+    properties:
+      message: 
+        type: string
+  New_user:
+    type: object
+    properties:
+      id:
+        type: int
+        format: int64
+      name:
+        type: string
+        format: varchar255
+      email:
+        type: string
+        format: varchar255
+      password:
+        type: string
+        format: varchar255
+      direction:
+        type: string
+        format: varchar255
+  User:
+    type: object
+    properties:
+      id:
+        type: int
+        format: int64
+      name:
+        type: string
+        format: varchar255
+      email:
+        type: string
+        format: varchar255
+      password:
+        type: string
+        format: varchar255
+      direction:
+        type: string
+        format: varchar255
+      admin:
+        type: integer
+        format: tinyint
+        default: 0
+        description: Shows the role of user. Admin = 1, customer = 0
+  Welcome_user:
+    type: object
+    properties:
+      Message:
+        type: string
+      token:
+        type: string
+  User_data:
+    type: object
+    properties:
+      email:
+        type: string
+        format: varchar255
+      password:
+        type: string
+        format: varchar255
+  User_email: 
+    type: object
+    properties: 
+      email: 
+        type: string
+        format: varchar255
+  Dish:
     type: object
     properties:
       id:
         type: integer
         format: int64
-      petId:
-        type: integer
+      description:
+        type: string
+        format: varchar255
+      image:
+        type: string
+        format: text
+      price:
+        type: number
         format: int64
-      quantity:
-        type: integer
-        format: int32
-      shipDate:
-        type: string
-        format: date-time
-      status:
-        type: string
-        description: Order Status
-        enum:
-        - placed
-        - approved
-        - delivered
-      complete:
-        type: boolean
-        default: false
-    xml:
-      name: Order
-  Category:
+  Tag:
     type: object
     properties:
       id:
@@ -586,31 +742,7 @@ definitions:
       name:
         type: string
     xml:
-      name: Category
-  User:
-    type: object
-    properties:
-      id:
-        type: integer
-        format: int64
-      username:
-        type: string
-      firstName:
-        type: string
-      lastName:
-        type: string
-      email:
-        type: string
-      password:
-        type: string
-      phone:
-        type: string
-      userStatus:
-        type: integer
-        format: int32
-        description: User Status
-    xml:
-      name: User
+      name: Tag
   Tag:
     type: object
     properties:

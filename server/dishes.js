@@ -32,6 +32,7 @@ router.get("/dishes", async (req, res) => {
             }
         } catch (error) {
             console.error(error);
+            res.status(400);
         }
 })
 router.post("/dishes", checkAdmin, async (req, res) => {

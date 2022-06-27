@@ -4,7 +4,7 @@ const checkAdmin = async(req, res, next) => {
     /* This is what comes in the payload (admin == 1, customer == 0) =>>> user: { payload: { user: 'Nicole Lepariz', role: 0 },iat: 1655393607,exp: 1655397207},*/
     try {
         const role = req.user.payload.role;
-        role == 1 ? next() : res.status(403).json("Sorry, only admins have access");
+        role == 1 ? next() : res.status(401).json("Sorry, only admins have access");
     } catch(error) {
         console.error(error);
     }
@@ -18,13 +18,14 @@ const verifyUser = async (req, res, next) => {
             if (records[0]) {
                 next();
             } else if (records[0] == null) {
-                res.status(404).send("User not found :V")
+                res.status(404).json("User not found :V")
             }
         } catch (error) {
+            res.status(400).json("Error message: " + error);
             console.error(error);
         }
     } else {
-        res.status(404).send("You need to insert your name and password");
+        res.status(400).json("You need to insert your name and password");
     }
 }
 //Middleware for "/signup" to verify if user already exists 
@@ -42,7 +43,7 @@ const existingUser = async (req, res, next) => {
             console.error(error);
         }
     } else {
-        res.status(404).send("You need to insert the data required");
+        res.status(400).send("You need to insert the data required");
     }
 }
 
