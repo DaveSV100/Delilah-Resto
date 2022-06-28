@@ -71,7 +71,7 @@ paths:
         description: User data
         required: true
         schema:
-          $ref: '#/definitions/client_user'
+          $ref: '#/definitions/new_user'
           $ref: '#/definitions/user'
       responses:
         200: 

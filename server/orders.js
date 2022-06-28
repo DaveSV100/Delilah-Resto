@@ -28,15 +28,6 @@ router.use(function (err, req, res, next) {
   }
 });
 
-// router.get("/order", async (req, res) => {
-//   try {
-//     res.status(200).json("Take your order now");
-//   } catch (error) {
-//     console.error(error);
-//     res.status(400);
-//   }
-// });
-
 router.get("/orders", async (req, res) => {
   if(req.user.payload.role == 1 ) {
     try {

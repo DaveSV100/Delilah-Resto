@@ -2,15 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const compression = require("compression");
-const sequelize = require("../database/connection.js");
-const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
 const jwtKey = process.env.JWTKEY;
 const app = express();
 const port = 3000;
 const helmet = require("helmet");
 const cors = require("cors");
-// const { type } = require("express/lib/response");
 const corsOptions = {
     origin: "http://127.0.0.1:3000",
 }
@@ -30,7 +27,7 @@ app.use("/", dishes);
 app.use("/", orders);
 
 //algorithms: ["RS256"]
-app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/", "/login", "/signup" ] }));
+app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/" ] }));
 //Port listener
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);

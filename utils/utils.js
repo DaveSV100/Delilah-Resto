@@ -48,13 +48,40 @@ const existingUser = async (req, res, next) => {
     }
 }
 
+//Middleware to check if the user exists
+const verifyData = async (req, res, next) => {
+    if (req.body.email) {
+        try {
+            const records = await sequelize.query("SELECT * FROM users WHERE email = ?", { replacements: [req.body.email], type: sequelize.QueryTypes.SELECT, })
+            //This if statment verifies whether there's data or not
+            if (records[0]) {
+                next();
+            } else if (records[0] == null) {
+                res.status(404).json("User not found :V")
+            }
+        } catch (error) {
+            res.status(400).json("Error message: " + error);
+            console.error(error);
+        }
+    } else {
+        res.status(400).json("You need to insert the email");
+    }
+   
+}
+
 //GET ID function for "/modifyuser" and "/deleteuser" routes
 const getID = async(user_email) => {
-    const user = await sequelize.query("SELECT id FROM users WHERE email = ?", { replacements: [user_email], type: sequelize.QueryTypes.SELECT, })
-    const id = user[0].id;
-    console.log(id);
-    return id;
+    try {
+        const user = await sequelize.query("SELECT id FROM users WHERE email = ?", { replacements: [user_email], type: sequelize.QueryTypes.SELECT, })
+        const id = user[0].id;
+        console.log(id);
+        return id;
+    } catch(error) {
+        console.error(error);
+    }
 }
+
+
 
 //Verify Dish
 const verifyDish = async (req, res, next) => {
@@ -101,6 +128,7 @@ module.exports = {
     checkAdmin,
     verifyUser,
     existingUser,
+    verifyData,
     getID,
     verifyDish,
     getDish,
