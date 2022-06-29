@@ -72,8 +72,8 @@ const verifyData = async (req, res, next) => {
 //GET ID function for "/modifyuser" and "/deleteuser" routes
 const getID = async(user_email) => {
     try {
-        const user = await sequelize.query("SELECT id FROM users WHERE email = ?", { replacements: [user_email], type: sequelize.QueryTypes.SELECT, })
-        const id = user[0].ID;
+        const user = await sequelize.query("SELECT id FROM users WHERE email = :email", { replacements: { email: user_email }, type: sequelize.QueryTypes.SELECT, })
+        const id = user[0].id;
         console.log(id);
         return id;
     } catch(error) {

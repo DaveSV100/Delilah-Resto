@@ -84,70 +84,48 @@ router.post("/users/login", verifyUser, async (req, res) => {
         console.error(error);
     }
 });
-router.put("/users", verifyData, async(req, res) => {
-    if(req.user.payload.role == 1 ) {
+router.put("/users/:id", checkAdmin, async(req, res) => {
+    //Admins can make changes over any user by providing an email
+    if(req.params.id != null) {
+        const user_id = req.params.id;
         const { name, email, direction, admin } = req.body;
-        //Admins can make changes over any user by providing an email
-            try {
-                //Const user_id calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
-                const user_id = await getID(req.body.email);
-                const update = await sequelize.query(
-                    "UPDATE users SET name = :name, email = :email, direction = :direction, admin = :admin WHERE id = :id",
-                    { replacements: { name, email, direction, admin, id: user_id } }
-                )
+        try {
+            //Const user_id calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
+            // const user_id = await getID(req.body.email);
+            const update = await sequelize.query(
+                "UPDATE users SET name = :name, email = :email, direction = :direction, admin = :admin WHERE id = :id",
+                { replacements: { name, email, direction, admin, id: user_id } }
+            )
+            if(update[0].changedRows == 0) {
+                res.status(404).json("ID doesn't exist")
+            } else {
                 res.status(200).json(`User updated correctly`);
-            } catch (error) {
-                console.error(error);
-                res.status(400).json("Error message: " + error);
             }
-    } else  {
-        const { name, password, direction } = req.body;
-        if(name, password, direction) {
-            try {
-                //Those who are not admins can only make changes in their own ID not in the id of others. The id is taken from the "payload" which was created when the token was generated.
-                const user_id = await req.user.payload.id;
-                console.log("IDDDD => " + user_id)
-                const update = await sequelize.query(
-                    "UPDATE users SET name = :name, password = :password, direction = :direction WHERE id = :id",
-                    { replacements: {name, password, direction, id: user_id} }
-                )
-                res.status(200).json(`User updated corrrectly`);
-            } catch (error) {
-                console.error(error);
-                res.status(400).json("Error message: " + error);
-            }
-        } else {
-            res.status(400).json("You need to insert the data");
+        } catch (error) {
+            console.error(error);
+            res.status(400).json("Error message: " + error);
         }
+    } else {
+        res.status(400).json("You need to insert the ID");
     }
 })
-router.delete("/users", async(req, res) => {
-    if(req.user.payload.role == 1 ) {
+router.delete("/users/:id", checkAdmin, async(req, res) => {
         try {
+            const user_id = req.params.id;
             //The next const calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
-            const user_id = await getID(req.body.email);
+            // const user_id = await getID(req.body.email);
             const deleteUser = await sequelize.query(
                 "DELETE FROM users WHERE id = :id",
                 { replacements: {id: user_id} }
             )
-            res.status(200).json("User removed");
+            if(deleteUser[0].affectedRows == 0) {
+                res.status(404).json("ID doesn't exist")
+            } else {
+                res.status(200).json(`User removed correctly`);
+            }
         } catch (error) {
             console.error(error);
             res.status(400).json("Error: " + error);
         }
-    } else {
-        try {
-            //Those who are not admins can only make changes in their own ID not in the id of others. The id is taken from the "payload" which was created when the token was generated.
-            const user_id = await req.user.payload.id;
-            const deleteUser = await sequelize.query(
-                "DELETE FROM users WHERE id = :id",
-                { replacements: {id: user_id} }
-            )
-            res.status(200).json("User removed");
-        } catch(error) {
-            console.error(error);
-            res.status(400);
-        }
-    }
 })
 module.exports = router;

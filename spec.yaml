@@ -56,63 +56,6 @@ paths:
           $ref: '#/securityDefinitions/bearerAuth' 
         - adminAuth:
           $ref: '#/securityDefinitions/adminAuth'
-    put:
-      tags:
-      - users
-      summary: Update an existing user
-      description: If it's an admin it'll make use of the "user" object format but if it's a normal user it'll utilize the "new_user" format
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      parameters:
-      - in: body
-        name: body
-        description: User data
-        required: true
-        schema:
-          $ref: '#/definitions/new_user'
-          $ref: '#/definitions/user'
-      responses:
-        200: 
-          description: successful operation
-            schema: 
-              type: array
-                items:
-                  $ref: '#/definitions/ok'
-        400:
-          description: Bad request. Missing arguments
-        404:
-          description: User not found
-      security:
-        - token:
-          $ref: '#/securityDefinitions/token'
-    delete:
-      tags:
-      - users
-      summary: Delete user
-      description: A normal user can delete only his own account. Admins can insert the email of an especific account to be deleted
-      produces:
-      - application/json
-      parameters:
-      - in: body
-        name: body
-        description: Email of user
-        required: true
-        schema:
-          $ref: '#/definitions/user_email'
-      responses:
-        200
-          description: User removed
-        400:
-          description: Invalid data
-        404:
-          description: User not found
-      security:
-      - bearerAuth:
-        $ref: '#/securityDefinitions/bearerAuth' 
-      - adminAuth:
-        $ref: '#/securityDefinitions/adminAuth'
   /users/{id}:
     get:
       tags:
@@ -144,6 +87,69 @@ paths:
         $ref: '#/securityDefinitions/bearerAuth' 
       - adminAuth:
         $ref: '#/securityDefinitions/adminAuth'    
+    put:
+      tags:
+      - users
+      summary: Update an existing user
+      description: Modify the data of a user. Only can be done by admis. It's used to change admin roles
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        description: ID of user
+        required: true
+        type: integer
+        format: int64
+      - in: body
+        name: body
+        description: User data
+        schema: 
+          $ref: '#/definitions/user'
+      responses:
+        200: 
+          description: successful operation
+            schema: 
+              type: array
+                items:
+                  $ref: '#/definitions/ok'
+        400:
+          description: Bad request. Missing arguments
+        404:
+          description: User not found
+      security:
+      - bearerAuth:
+        $ref: '#/securityDefinitions/bearerAuth' 
+      - adminAuth:
+        $ref: '#/securityDefinitions/adminAuth'
+    delete:
+      tags:
+      - users
+      summary: Delete user
+      description: Delete user by id. Only can be done by admis
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        description: ID of user
+        required: true
+        type: integer
+        format: int64
+      responses:
+        200
+          description: User removed
+        400:
+          description: Invalid data
+        404:
+          description: User not found
+      security:
+      - bearerAuth:
+        $ref: '#/securityDefinitions/bearerAuth' 
+      - adminAuth:
+        $ref: '#/securityDefinitions/adminAuth'
   /users/login:
     post:
       tags:
