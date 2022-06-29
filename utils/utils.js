@@ -73,7 +73,7 @@ const verifyData = async (req, res, next) => {
 const getID = async(user_email) => {
     try {
         const user = await sequelize.query("SELECT id FROM users WHERE email = ?", { replacements: [user_email], type: sequelize.QueryTypes.SELECT, })
-        const id = user[0].id;
+        const id = user[0].ID;
         console.log(id);
         return id;
     } catch(error) {

@@ -69,12 +69,13 @@ router.post("/users/login", verifyUser, async (req, res) => {
         const data = await sequelize.query("SELECT * FROM users WHERE email = ?", {replacements: [req.body.email], type: sequelize.QueryTypes.SELECT,})
         const username = data[0].Name;
         const admin = data[0].Admin;
-        const id = data[0].id;
+        const id = data[0].ID;
         const payload = {
             user: username,
             role: admin,
             id: id
         }
+        console.log(payload);
         const token = jwt.sign({payload}, jwtKey, { expiresIn: "1h" });
         res.status(200).json({Message: `You're welcome ${username}`, Token: token});
         console.log(token);
@@ -85,33 +86,30 @@ router.post("/users/login", verifyUser, async (req, res) => {
 });
 router.put("/users", verifyData, async(req, res) => {
     if(req.user.payload.role == 1 ) {
-        //Admins can make changes over any user by providing an email
         const { name, email, direction, admin } = req.body;
-        if(name, email, direction, admin) {
+        //Admins can make changes over any user by providing an email
             try {
                 //Const user_id calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
                 const user_id = await getID(req.body.email);
                 const update = await sequelize.query(
                     "UPDATE users SET name = :name, email = :email, direction = :direction, admin = :admin WHERE id = :id",
-                    { replacements: {name, email, direction, admin, id: user_id} }
+                    { replacements: { name, email, direction, admin, id: user_id } }
                 )
-                res.status(200).json(`User updated corrrectly`);
+                res.status(200).json(`User updated correctly`);
             } catch (error) {
                 console.error(error);
                 res.status(400).json("Error message: " + error);
             }
-        } else {
-            res.status(400).json("You need to insert the data");
-        }
     } else  {
-        const { name, email, password, direction } = req.body;
-        if(name, email, password, direction) {
+        const { name, password, direction } = req.body;
+        if(name, password, direction) {
             try {
                 //Those who are not admins can only make changes in their own ID not in the id of others. The id is taken from the "payload" which was created when the token was generated.
                 const user_id = await req.user.payload.id;
+                console.log("IDDDD => " + user_id)
                 const update = await sequelize.query(
-                    "UPDATE users SET name = :name, email = :email, password = :password, direction = :direction WHERE id = :id",
-                    { replacements: {name, email, password, direction, id: user_id} }
+                    "UPDATE users SET name = :name, password = :password, direction = :direction WHERE id = :id",
+                    { replacements: {name, password, direction, id: user_id} }
                 )
                 res.status(200).json(`User updated corrrectly`);
             } catch (error) {
@@ -122,7 +120,6 @@ router.put("/users", verifyData, async(req, res) => {
             res.status(400).json("You need to insert the data");
         }
     }
-    
 })
 router.delete("/users", async(req, res) => {
     if(req.user.payload.role == 1 ) {
