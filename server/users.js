@@ -32,7 +32,6 @@ router.get("/users", checkAdmin, async (req, res) => {
   });
 router.get("/users/:id", checkAdmin, async (req, res) => {
         const user_id = req.params.id;
-        if(req.params.id != null) {
             try {
                 const records = await sequelize.query("SELECT * FROM users WHERE id = :id", { replacements: {id: user_id}, type: sequelize.QueryTypes.SELECT })
                 if(records.length == 0) {
@@ -44,7 +43,6 @@ router.get("/users/:id", checkAdmin, async (req, res) => {
                 console.error(error);
                 res.status(400).json(`Error message: ${error}` );
             }   
-        } 
 })
 router.post("/users/signup", existingUser, async (req, res) => {
     const { name, email, password, direction } = req.body;
@@ -85,47 +83,39 @@ router.post("/users/login", verifyUser, async (req, res) => {
     }
 });
 router.put("/users/:id", checkAdmin, async(req, res) => {
-    //Admins can make changes over any user by providing an email
-    if(req.params.id != null) {
-        const user_id = req.params.id;
-        const { name, email, direction, admin } = req.body;
-        try {
-            //Const user_id calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
-            // const user_id = await getID(req.body.email);
-            const update = await sequelize.query(
-                "UPDATE users SET name = :name, email = :email, direction = :direction, admin = :admin WHERE id = :id",
-                { replacements: { name, email, direction, admin, id: user_id } }
-            )
-            if(update[0].changedRows == 0) {
-                res.status(404).json("ID doesn't exist")
-            } else {
-                res.status(200).json(`User updated correctly`);
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(400).json("Error message: " + error);
+    //Admins can make changes over any user by providing the id
+    const user_id = req.params.id;
+    const { name, email, direction, admin } = req.body;
+    try {
+        const update = await sequelize.query(
+            "UPDATE users SET name = :name, email = :email, direction = :direction, admin = :admin WHERE id = :id",
+            { replacements: { name, email, direction, admin, id: user_id } }
+        )
+        if(update[0].changedRows == 0) {
+            res.status(404).json("ID doesn't exist")
+        } else {
+            res.status(200).json(`User updated correctly`);
         }
-    } else {
-        res.status(400).json("You need to insert the ID");
+    } catch (error) {
+        console.error(error);
+        res.status(400).json("Error message: " + error);
     }
 })
 router.delete("/users/:id", checkAdmin, async(req, res) => {
-        try {
-            const user_id = req.params.id;
-            //The next const calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
-            // const user_id = await getID(req.body.email);
-            const deleteUser = await sequelize.query(
-                "DELETE FROM users WHERE id = :id",
-                { replacements: {id: user_id} }
-            )
-            if(deleteUser[0].affectedRows == 0) {
-                res.status(404).json("ID doesn't exist")
-            } else {
-                res.status(200).json(`User removed correctly`);
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(400).json("Error: " + error);
+    try {
+        const user_id = req.params.id;
+        const deleteUser = await sequelize.query(
+            "DELETE FROM users WHERE id = :id",
+            { replacements: {id: user_id} }
+        )
+        if(deleteUser[0].affectedRows == 0) {
+            res.status(404).json("ID doesn't exist")
+        } else {
+            res.status(200).json(`User removed correctly`);
         }
+    } catch (error) {
+        console.error(error);
+        res.status(400).json("Error: " + error);
+    }
 })
 module.exports = router;
