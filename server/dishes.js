@@ -10,7 +10,7 @@ const {
     getDish
 } = require("../utils/utils.js");
 
-router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/", "/login", "/signup" ] }));
+router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/" ] }));
 router.use(function (err, req, res, next) {
     if (err.name === "UnauthorizedError") {
         res.status(401).send("You need to sign in or sign up");
@@ -19,16 +19,15 @@ router.use(function (err, req, res, next) {
     }
 })
 
-
 router.get("/dishes", async (req, res) => {
     try {
         const records = await sequelize.query(
             "SELECT * FROM dishes", { type: sequelize.QueryTypes.SELECT }
             )
-            if(records) {
-                res.status(200).json(records);
-            } else {
+            if(records.length == 0) {
                 res.status(404).json("There's no data")
+            } else {
+                res.status(200).json(records);
             }
         } catch (error) {
             console.error(error);
@@ -52,30 +51,32 @@ router.post("/dishes", checkAdmin, async (req, res) => {
     }
 })
 router.put("/dishes", verifyDish, checkAdmin, async (req, res) => {
-    const { description, image, price } = req.body;
+    
     try {
+        const { description, image, price } = req.body;
         const dishID = await getDish(req.body.description);
-        if(dishID != "") {
-            const updateDish = await sequelize.query(
-                "UPDATE dishes SET description = :description, image = :image, price = :price WHERE id = :id",
-                { replacements: {description, image, price, id: dishID} }
-            )
-            res.status(200).json("Dish updated");
-        } else {
-            res.status(404);
-        }
+        const updateDish = await sequelize.query(
+            "UPDATE dishes SET description = :description, image = :image, price = :price WHERE id = :id",
+            { replacements: {description, image, price, id: dishID} }
+        )
+        res.status(200).json("Dish updated");
     } catch(error) {
         console.error(error);
     }
 })
-router.delete("/dishes", verifyDish, checkAdmin, async(req, res) => {
+router.delete("/dishes/:id", checkAdmin, async(req, res) => {
     try {
-        const dishID = await getDish(req.body.description);
+        const dishID = req.params.id
         const deleteDish = await sequelize.query(
             "DELETE FROM dishes WHERE id = :id",
             { replacements: {id: dishID} }
         )
-        res.status(200).json("Dish removed");
+        if(deleteDish[0].affectedRows == 0) {
+            res.status(404).json("Dish not found")
+        } else {
+            res.status(200).json("Dish removed")
+        }
+        res.status(200).json();
     } catch(error) {
         console.error(error);
     }

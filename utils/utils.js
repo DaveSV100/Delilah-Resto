@@ -26,8 +26,24 @@ const verifyUser = async (req, res, next) => {
             console.error(error);
         }
     } else {
-        res.status(400).json("You need to insert your name and password");
+        res.status(400).json("You need to insert your email and password");
     }
+}
+//Middleware to check if user exits by ID
+const verifyUserId = async(req, res, next) => {
+    if (req.params != null) {
+        try {
+            const records = await sequelize.query("SELECT * FROM users WHERE id = ?", { replacements: [req.params.id] })
+            console.log(records)
+            if(records[0].length == 0) {
+                res.json("User not found :V")
+            } else {
+                next()
+            }
+        } catch(error) {
+            console.error(error);
+        }
+    } 
 }
 //Middleware for "/signup" to verify if user already exists 
 const existingUser = async (req, res, next) => {
@@ -48,44 +64,17 @@ const existingUser = async (req, res, next) => {
     }
 }
 
-//Middleware to check if the user exists
-const verifyData = async (req, res, next) => {
-    if (req.body.email) {
-        try {
-            const records = await sequelize.query("SELECT * FROM users WHERE email = ?", { replacements: [req.body.email], type: sequelize.QueryTypes.SELECT, })
-            //This if statment verifies whether there's data or not
-            if (records[0]) {
-                next();
-            } else if (records[0] == null) {
-                res.status(404).json("User not found :V")
-            }
-        } catch (error) {
-            res.status(400).json("Error message: " + error);
-            console.error(error);
-        }
-    } else {
-        res.status(400).json("You need to insert the email");
-    }
-   
-}
-
 //GET ID function for "/modifyuser" and "/deleteuser" routes
 const getID = async(user_email) => {
-    try {
-        const user = await sequelize.query("SELECT id FROM users WHERE email = :email", { replacements: { email: user_email }, type: sequelize.QueryTypes.SELECT, })
-        const id = user[0].id;
-        console.log(id);
-        return id;
-    } catch(error) {
-        console.error(error);
-    }
+    const user = await sequelize.query("SELECT id FROM users WHERE email = ?", { replacements: [user_email], type: sequelize.QueryTypes.SELECT, })
+    const id = user[0].id;
+    console.log(id);
+    return id;
 }
-
-
 
 //Verify Dish
 const verifyDish = async (req, res, next) => {
-    if(req.body.description != null) {
+    if(req.body.description && req.body.image && req.body.price != undefined) {
         try {
             const records = await sequelize.query("SELECT * FROM dishes WHERE description = ?", { replacements: [req.body.description], type: sequelize.QueryTypes.SELECT})
             if(records[0]) {
@@ -98,7 +87,7 @@ const verifyDish = async (req, res, next) => {
             console.error(error);
         }
     } else {
-        res.status(404).json("You need to insert the description of the dish")
+        res.status(404).json("You need to insert all the dish data")
     }
 }
 // Function to get the dish data
@@ -114,6 +103,7 @@ const getDish = async(description) => {
         console.error(error);
     }
 }
+
 //Function to get the Order ID
 const getOrder = async (dishId, userId) => {
     const records = await sequelize.query(
@@ -128,9 +118,9 @@ module.exports = {
     checkAdmin,
     verifyUser,
     existingUser,
-    verifyData,
     getID,
     verifyDish,
     getDish,
-    getOrder
+    getOrder,
+    verifyUserId
 };
