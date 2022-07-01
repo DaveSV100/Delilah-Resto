@@ -129,35 +129,6 @@ router.put("/users/client-update", async(req, res) => {
             res.status(400).json(error);
         }
 })
-// router.delete("/users", verifyUser, async(req, res) => {
-//     if(req.user.payload.role == 1 ) {
-//         try {
-//             //The next const calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
-//             const user_id = await getID(req.body.email);
-//             const deleteUser = await sequelize.query(
-//                 "DELETE FROM users WHERE id = :id",
-//                 { replacements: {id: user_id} }
-//             )
-//             res.status(200).json("User removed");
-//         } catch (error) {
-//             console.error(error);
-//             res.status(400).json("Error: " + error);
-//         }
-//     } else {
-//         try {
-//             //Those who are not admins can only make changes in their own ID not in the id of others. The id is taken from the "payload" which was created when the token was generated.
-//             const user_id = await req.user.payload.id;
-//             const deleteUser = await sequelize.query(
-//                 "DELETE FROM users WHERE id = :id",
-//                 { replacements: {id: user_id} }
-//             )
-//             res.status(200).json("User removed");
-//         } catch(error) {
-//             console.error(error);
-//             res.status(400);
-//         }
-//     }
-// })
 router.delete("/users/admin-delete/:id", checkAdmin, async(req, res) => {
         try {
             //The next const calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
