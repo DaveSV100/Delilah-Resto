@@ -700,6 +700,7 @@ definitions:
       description: 
         type: object
         format: varchar255
+        example: ["Burger", "Tostadas"]
       payment:
         type: string
         format: varchar255

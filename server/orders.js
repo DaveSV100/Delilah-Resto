@@ -15,7 +15,7 @@ const {
 } = require("../utils/utils.js");
 const { use } = require("./users.js");
 
-// //algorithms: ["RS256"]
+//Check token
 router.use(
   expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({
     path: ["/"],
@@ -30,11 +30,11 @@ router.use(function (err, req, res, next) {
 });
 
 router.get("/orders", async (req, res) => {
+  /* Admins can get all the orders and clients only their own orders. Admin == 1, Client == 0
+  The query will join the Orders table with Orders_dishes table and Users table */
   if(req.user.payload.role == 1 ) {
     try {
       const records = await sequelize.query(
-      //"SELECT Orders.ID, Orders.Status, Orders.Date, Orders.Description, Orders.Payment, users.name, users.email, users.direction, users.admin FROM Orders INNER JOIN users ON Orders.User_id = users.id ORDER BY date ASC", { type: sequelize.QueryTypes.SELECT }
-      //"SELECT * FROM Orders INNER JOIN dishes ON Orders.Dish_id = dishes.id INNER JOIN users ON Orders.User_id = users.id", { type: sequelize.QueryTypes.SELECT }
       "SELECT Orders_dishes.id, Orders.status, Orders.date, Dishes.description, Dishes.image, Dishes.price, Orders.payment, Users.Name, Users.direction FROM Orders INNER JOIN orders_dishes ON Orders.ID = Orders_dishes.Order_id INNER JOIN Dishes ON Orders_dishes.Dish_id = Dishes.id INNER JOIN users ON Orders.User_id = users.id ORDER BY Orders_dishes.id ASC", 
       { type: sequelize.QueryTypes.SELECT }
       )
@@ -45,6 +45,7 @@ router.get("/orders", async (req, res) => {
     }
   } else {
       const user_id = await req.user.payload.id
+      //Search by User ID
       try {
         const records = await sequelize.query(
           "SELECT Orders_dishes.id, Orders.status, Orders.date, Dishes.description, Dishes.image, Dishes.price, Orders.payment, Users.Name, Users.direction FROM Orders INNER JOIN orders_dishes ON Orders.ID = Orders_dishes.Order_id INNER JOIN Dishes ON Orders_dishes.Dish_id = Dishes.id INNER JOIN users ON Orders.User_id = users.id WHERE Users.id= :id", 
@@ -59,14 +60,17 @@ router.get("/orders", async (req, res) => {
 })
 
 router.post("/orders", verifyOrder, async (req, res) => {
-  //ID, STATUS, DATE, TIME, DESCRIPTION, PAYMENT, USER
+  /* Create a new order. It can contain an array of many products or a single string. 
+  Description and payment are required and verified by the middleware "verifyOrder" */
   const { description, payment } = req.body;
   const userId = req.user.payload.id;
   try {
     const date = new Date();
     if(typeof description == "object") {
+      //If it is an array (object prototype)
       description.forEach(async(element) => {
         const dishId = await getDish(element);
+        //Data will be inserted into Order table
         const makeOrder = await sequelize.query(
           "INSERT INTO orders (Status, Date, Dish_id, User_id, Payment) VALUES (:status, :date, :dish_id, :user_id, :payment)",
           { replacements: {
@@ -78,6 +82,8 @@ router.post("/orders", verifyOrder, async (req, res) => {
           } }
         );
         const orderId = await getOrder(dishId, userId);
+        /* The Order_id and Dish_id data will be also inserted into Orders_dishes table so that we can join the tables 
+        Orders and Dishes and get the full list of Orders when we make a get request */
         const insertData = await sequelize.query(
           "INSERT INTO Orders_dishes (Order_id, Dish_id) VALUES (:order_id, :dish_id)",
           {
@@ -89,6 +95,7 @@ router.post("/orders", verifyOrder, async (req, res) => {
         )
       });
     } else {
+      //If it is a single string
       const dishId = await getDish(description);
         const makeOrder = await sequelize.query(
           "INSERT INTO orders (Status, Date, Dish_id, User_id, Payment) VALUES (:status, :date, :dish_id, :user_id, :payment)",
@@ -119,6 +126,7 @@ router.post("/orders", verifyOrder, async (req, res) => {
 });
 
 router.put("/orders", checkAdmin, async (req, res) => {
+  //Update order by ID of order, only admins allowed. 
   const { new_status, orderID } = req.body;
   const order_status = ["New", "Confirmed", "Preparing", "Delivering", "Cancelled", "Delivered"];
   if(new_status && orderID != undefined) {
@@ -142,6 +150,7 @@ router.put("/orders", checkAdmin, async (req, res) => {
 })
 
 router.delete("/orders", checkAdmin, async (req, res) => {
+  //Delete order by ID
   try {
     const orderID = req.body.orderID;
     if(orderID != undefined) {

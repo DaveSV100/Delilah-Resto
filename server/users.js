@@ -8,11 +8,10 @@ const {
     checkAdmin,
     verifyUser,
     verifyUserId,
-    existingUser,
-    getID
+    existingUser
   } = require("../utils/utils");
 
-// //algorithms: ["RS256"]
+//Check token
 router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/signup", "/users/login"] }));
 router.use(function (err, req, res, next) {
     if (err.name === "UnauthorizedError") {
@@ -23,6 +22,7 @@ router.use(function (err, req, res, next) {
 })
 
 router.get("/users", checkAdmin, async (req, res) => {
+    //Get all the users. It can only be done by admins
     try {
         const records = await sequelize.query("SELECT * FROM users", { type: sequelize.QueryTypes.SELECT })
         res.status(200).json(records);
@@ -32,6 +32,7 @@ router.get("/users", checkAdmin, async (req, res) => {
     }      
   });
 router.get("/users/:id", checkAdmin, async (req, res) => {
+        //Get specific user by its id. Only admins allowed
         const user_id = req.params.id;
         if(req.params.id != null) {
             try {
@@ -50,22 +51,19 @@ router.get("/users/:id", checkAdmin, async (req, res) => {
         } 
 })
 router.post("/users/login", verifyUser, async (req, res) => {
+    //Login user
     const email = req.body.email;
     try {
         const data = await sequelize.query("SELECT * FROM users WHERE email = ?", {replacements: [req.body.email], type: sequelize.QueryTypes.SELECT,})
-        console.log(data[0].Admin);
-        console.log(data[0].Name);
-        console.log(data[0].id);
-        // const user = req.body;
         const username = data[0].Name;
         const admin = data[0].Admin;
         const id = data[0].ID;
-        console.log(data)
         const payload = {
             user: username,
             role: admin,
             id: id
         }
+        //Into the payload will be inserted name of user, role (1 == admin, 0 == client), and ID
         console.log(payload)
         const token = jwt.sign({payload}, jwtKey, { expiresIn: "1h" });
         res.status(200).json({Message: `You're welcome ${username}`, Token: token});
@@ -76,6 +74,7 @@ router.post("/users/login", verifyUser, async (req, res) => {
     }
 });
 router.post("/users/signup", existingUser, async (req, res) => {
+    //User sign up. The followwing fields are required
     const { name, email, password, direction } = req.body;
     try {
         if (name && email && password && direction) {
@@ -93,20 +92,14 @@ router.post("/users/signup", existingUser, async (req, res) => {
     }
 });
 router.put("/users/admin-update/:id", verifyUserId, async(req, res) => {
-        // Admins can make changes over any user by providing an email
+        // Admins can make changes over any user by providing the ID of user. It can be used to change the role of any user
         const { name, email, password, direction, admin } = req.body;
         try {
-            //The next const calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
-            // const user_id = await getID(req.body.email);
             const user_id = req.params.id;
             const update = await sequelize.query(
                 "UPDATE users SET name = :name, email = :email, password = :password, direction = :direction, admin = :admin WHERE id = :id",
                 { replacements: {name, email, password, direction, admin, id: user_id } }
             )
-            // console.log(update)
-            // update.forEach(element => {
-            //     console.log(element.info)
-            // });
             res.status(200).json(`User updated correctly`);
         } catch (error) {
             console.error(error);
@@ -114,25 +107,26 @@ router.put("/users/admin-update/:id", verifyUserId, async(req, res) => {
         } 
 })
 router.put("/users/client-update", async(req, res) => {
+    //Update for normal clients
     const { name, email, password, direction } = req.body;
-        try {
-            console.log(req.user.payload);
-            //Those who are not admins can only make changes in their own ID not in the id of others. The id is taken from the "payload" which was created when the token was generated.
-            const user_id = await req.user.payload.id;
-            const update = await sequelize.query(
-                "UPDATE users SET name = :name, email = :email, password = :password, direction = :direction WHERE id = :id",
-                { replacements: {name, email, password, direction, id: user_id} }
-            )
-            res.status(200).json(`User updated corrrectly`);
-        } catch (error) {
-            console.error(error);
-            res.status(400).json(error);
-        }
+    try {
+        console.log(req.user.payload);
+        /* The ID of user is taken from the "payload" which was created when the token was generated. 
+        Changes will be applied only to that specific account */
+        const user_id = await req.user.payload.id;
+        const update = await sequelize.query(
+            "UPDATE users SET name = :name, email = :email, password = :password, direction = :direction WHERE id = :id",
+            { replacements: {name, email, password, direction, id: user_id} }
+        )
+        res.status(200).json(`User updated corrrectly`);
+    } catch (error) {
+        console.error(error);
+        res.status(400).json(error);
+    }
 })
 router.delete("/users/admin-delete/:id", checkAdmin, async(req, res) => {
+        //Delete user by ID. Only for admins
         try {
-            //The next const calls the function GETID in order to get the id of the user desired. It will use the email to make the query and find the id.
-            // const user_id = await getID(req.body.email);
             const user_id = req.params.id;
             const deleteUser = await sequelize.query(
                 "DELETE FROM users WHERE id = :id",
@@ -145,8 +139,8 @@ router.delete("/users/admin-delete/:id", checkAdmin, async(req, res) => {
         }
 })
 router.delete("/users/client-delete", verifyUser, async(req, res) => {
+    //Normal clients can delete its own account
     try {
-        //Those who are not admins can only make changes in their own ID not in the id of others. The id is taken from the "payload" which was created when the token was generated.
         const user_id = await req.user.payload.id;
         const deleteUser = await sequelize.query(
             "DELETE FROM users WHERE id = :id",

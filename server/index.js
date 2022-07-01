@@ -26,6 +26,7 @@ app.use("/", userRoute);
 app.use("/", dishes);
 app.use("/", orders);
 
+//Check token
 //algorithms: ["RS256"]
 app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/" ] }));
 //Port listener

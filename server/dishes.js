@@ -10,6 +10,7 @@ const {
     getDish
 } = require("../utils/utils.js");
 
+//Verify token
 router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/" ] }));
 router.use(function (err, req, res, next) {
     if (err.name === "UnauthorizedError") {
@@ -20,6 +21,7 @@ router.use(function (err, req, res, next) {
 })
 
 router.get("/dishes", async (req, res) => {
+    //Route to get all the dishes. For customers and admins
     try {
         const records = await sequelize.query(
             "SELECT * FROM dishes", { type: sequelize.QueryTypes.SELECT }
@@ -35,6 +37,7 @@ router.get("/dishes", async (req, res) => {
         }
 })
 router.post("/dishes", checkAdmin, async (req, res) => {
+    //Create a new product. Only admins allowed
     const { description, image, price } = req.body;
     try {
         if (description && image && price) {
@@ -51,7 +54,7 @@ router.post("/dishes", checkAdmin, async (req, res) => {
     }
 })
 router.put("/dishes", verifyDish, checkAdmin, async (req, res) => {
-    
+    //Update product Only can be done by admins
     try {
         const { description, image, price } = req.body;
         const dishID = await getDish(req.body.description);
@@ -65,6 +68,7 @@ router.put("/dishes", verifyDish, checkAdmin, async (req, res) => {
     }
 })
 router.delete("/dishes/:id", checkAdmin, async(req, res) => {
+    //Delete product by ID
     try {
         const dishID = req.params.id
         const deleteDish = await sequelize.query(

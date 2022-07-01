@@ -1,7 +1,10 @@
 const sequelize = require("../database/connection.js");
 
+//Middleware to check role of user, admin or client
 const checkAdmin = async(req, res, next) => {
-    /* This is what comes in the payload (admin == 1, customer == 0) =>>> user: { payload: { user: 'Nicole Lepariz', role: 0 },iat: 1655393607,exp: 1655397207},*/
+    /* Role =>>> admin == 1, customer == 0.
+    This is what comes in the payload :
+    user: { payload: { user: 'Nicole Lepariz', role: 0, id: 0 },iat: 1655393607,exp: 1655397207},*/
     try {
         const role = req.user.payload.role;
         role == 1 ? next() : res.status(403).json("Sorry, only admins have access");
@@ -10,6 +13,7 @@ const checkAdmin = async(req, res, next) => {
         console.error(error);
     }
 }
+
 //Middleware to check if the user already exists
 const verifyUser = async (req, res, next) => {
     if(req.body.email && req.body.password != "") {
@@ -29,7 +33,8 @@ const verifyUser = async (req, res, next) => {
         res.status(400).json("You need to insert your email and password");
     }
 }
-//Middleware to check if user exits by ID
+
+//Middleware to check if user exits by its ID
 const verifyUserId = async(req, res, next) => {
     if (req.params != null) {
         try {
@@ -45,7 +50,9 @@ const verifyUserId = async(req, res, next) => {
         }
     } 
 }
-//Middleware for "/signup" to verify if user already exists 
+
+/* Middleware for "/signup" to verify if user already exists.
+But this one returns a different response in case of error */
 const existingUser = async (req, res, next) => {
     if(req.body.name && req.body.email != "") {
         try {
@@ -72,7 +79,7 @@ const getID = async(user_email) => {
     return id;
 }
 
-//Verify Dish
+//Verify is the product really exists
 const verifyDish = async (req, res, next) => {
     if(req.body.description && req.body.image && req.body.price != undefined) {
         try {
@@ -90,7 +97,7 @@ const verifyDish = async (req, res, next) => {
         res.status(404).json("You need to insert all the dish data")
     }
 }
-//Verify Order
+//Verify order data
 const verifyOrder = async (req, res, next) => {
     if(req.body.description && req.body.payment != undefined) {
         try {
