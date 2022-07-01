@@ -90,6 +90,28 @@ const verifyDish = async (req, res, next) => {
         res.status(404).json("You need to insert all the dish data")
     }
 }
+//Verify Order
+const verifyOrder = async (req, res, next) => {
+    if(req.body.description && req.body.payment != undefined) {
+        try {
+            const description = req.body.description;
+            description.forEach(async(element) => {
+                const dish_name = element;
+                const records = await sequelize.query("SELECT * FROM dishes WHERE description = ?", { replacements: [dish_name], type: sequelize.QueryTypes.SELECT})
+                if(records[0]) {
+                    next();
+                } else if (records[0] == null) {
+                    res.status(404).send("Dish not found :v");
+                }
+            })
+        } catch(error) {
+            res.status(400).json("Error message: " + error)
+            console.error(error);
+        }
+    } else {
+        res.status(404).json("You need to insert all the dish data")
+    }
+}
 // Function to get the dish data
 const getDish = async(description) => {
     try {
@@ -120,6 +142,7 @@ module.exports = {
     existingUser,
     getID,
     verifyDish,
+    verifyOrder,
     getDish,
     getOrder,
     verifyUserId

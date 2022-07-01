@@ -9,6 +9,7 @@ const {
   verifyUser,
   existingUser,
   verifyDish,
+  verifyOrder,
   getDish,
   getOrder
 } = require("../utils/utils.js");
@@ -17,7 +18,7 @@ const { use } = require("./users.js");
 // //algorithms: ["RS256"]
 router.use(
   expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({
-    path: ["/", "/signup", "/login"],
+    path: ["/"],
   })
 );
 router.use(function (err, req, res, next) {
@@ -32,13 +33,12 @@ router.get("/orders", async (req, res) => {
   if(req.user.payload.role == 1 ) {
     try {
       const records = await sequelize.query(
-        //"SELECT Orders.ID, Orders.Status, Orders.Date, Orders.Description, Orders.Payment, users.name, users.email, users.direction, users.admin FROM Orders INNER JOIN users ON Orders.User_id = users.id ORDER BY date ASC", { type: sequelize.QueryTypes.SELECT }
-        //"SELECT * FROM Orders INNER JOIN dishes ON Orders.Dish_id = dishes.id INNER JOIN users ON Orders.User_id = users.id", { type: sequelize.QueryTypes.SELECT }
-        "SELECT Orders_dishes.id, Orders.status, Orders.date, Dishes.description, Dishes.image, Dishes.price, Orders.payment, Users.Name, Users.direction FROM Orders INNER JOIN orders_dishes ON Orders.ID = Orders_dishes.Order_id INNER JOIN Dishes ON Orders_dishes.Dish_id = Dishes.id INNER JOIN users ON Orders.User_id = users.id ORDER BY Orders_dishes.id ASC", 
-        { type: sequelize.QueryTypes.SELECT }
-        )
-      
-      records ? res.status(200).json(records) : res.status(404);
+      //"SELECT Orders.ID, Orders.Status, Orders.Date, Orders.Description, Orders.Payment, users.name, users.email, users.direction, users.admin FROM Orders INNER JOIN users ON Orders.User_id = users.id ORDER BY date ASC", { type: sequelize.QueryTypes.SELECT }
+      //"SELECT * FROM Orders INNER JOIN dishes ON Orders.Dish_id = dishes.id INNER JOIN users ON Orders.User_id = users.id", { type: sequelize.QueryTypes.SELECT }
+      "SELECT Orders_dishes.id, Orders.status, Orders.date, Dishes.description, Dishes.image, Dishes.price, Orders.payment, Users.Name, Users.direction FROM Orders INNER JOIN orders_dishes ON Orders.ID = Orders_dishes.Order_id INNER JOIN Dishes ON Orders_dishes.Dish_id = Dishes.id INNER JOIN users ON Orders.User_id = users.id ORDER BY Orders_dishes.id ASC", 
+      { type: sequelize.QueryTypes.SELECT }
+      )
+      records.length == 0 ? res.status(404).json("There are no orders") : res.status(200).json(records);
     } catch (error) {
       res.status(400).json("Error message: " + error);
       console.error(error);
@@ -58,7 +58,7 @@ router.get("/orders", async (req, res) => {
   }
 })
 
-router.post("/orders", verifyDish, async (req, res) => {
+router.post("/orders", verifyOrder, async (req, res) => {
   //ID, STATUS, DATE, TIME, DESCRIPTION, PAYMENT, USER
   const { description, payment } = req.body;
   const userId = req.user.payload.id;
@@ -121,30 +121,38 @@ router.post("/orders", verifyDish, async (req, res) => {
 router.put("/orders", checkAdmin, async (req, res) => {
   const { new_status, orderID } = req.body;
   const order_status = ["New", "Confirmed", "Preparing", "Delivering", "Cancelled", "Delivered"];
-  if(order_status.includes(new_status)) {
-    try {
-      const updateDish = await sequelize.query(
-        "UPDATE Orders SET status = :status WHERE id = :id",
-        { replacements: {status: new_status, id: orderID} }
-    )
-      res.status(200).json(`The order ${orderID} is now updated as: ${new_status}.`);
-    } catch(error) {
-      console.error(error);
-      res.status(404);
+  if(new_status && orderID != undefined) {
+    if(order_status.includes(new_status)) {
+      try {
+        const updateDish = await sequelize.query(
+          "UPDATE Orders SET status = :status WHERE id = :id",
+          { replacements: {status: new_status, id: orderID} }
+      )
+        res.status(200).json(`The order ${orderID} has been updated as: ${new_status}.`);
+      } catch(error) {
+        console.error(error);
+        res.status(404);
+      }
+    } else {
+      res.status(404).json("Status not found");
     }
   } else {
-    res.status(404).json("Status not found");
+    res.status(400).json("You need to insert the data");
   }
 })
 
 router.delete("/orders", checkAdmin, async (req, res) => {
   try {
     const orderID = req.body.orderID;
-    const deleteOrder = await sequelize.query(
-      "DELETE FROM Orders WHERE id = :id",
-      { replacements: {id: orderID} }
-    )
-    res.status(200).json("Order deleated successfully");
+    if(orderID != undefined) {
+      const deleteOrder = await sequelize.query(
+        "DELETE FROM Orders WHERE id = :id",
+        { replacements: {id: orderID} }
+      )
+      res.status(200).json("Order deleated successfully");
+    } else {
+      res.status(400).json("You need to insert the ID");
+    }
   } catch(error) {
     res.status(404).json("Order not found. Error message: " + error)
     console.error(error);
