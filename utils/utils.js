@@ -9,7 +9,7 @@ const checkAdmin = async(req, res, next) => {
         const role = req.user.payload.role;
         role == 1 ? next() : res.status(403).json("Sorry, only admins have access");
     } catch(error) {
-        res.stauts(404).json("Error message: " + error)
+        res.status(404).json("Error message: " + error)
         console.error(error);
     }
 }
