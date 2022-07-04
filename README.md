@@ -2,22 +2,23 @@
 
 **Restaurant Rest API**
 
-It's the backend of a restaurant application where you can manage users, dishes and make orders.
+Backend of a restaurant application where you can manage users, dishes and make orders.
 ## Get started
 
 ## Specifications
 
 The specification for this API is in [Open API Docs](/spec.yaml).
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/11310918-65b92027-3618-4e45-892f-10de5219a031?action=collection%2Ffork&collection-url=entityId%3D11310918-65b92027-3618-4e45-892f-10de5219a031%26entityType%3Dcollection%26workspaceId%3Dc826a992-312b-490c-a58c-f68166b54224)
 
-### Clone the repository by the following code
+### 1.- Clone the repository
 
 ```
 $ git clone https://github.com/DaveSV100/delilah-resto.git
 ```
 
-or you can download it as a zip file.
+or you can also download it as a zip file.
 
-### Install the dependencies
+### 2.- Install the dependencies
 
 Use the following command
 
@@ -25,4 +26,29 @@ Use the following command
 npm install
 ```
 
-### Configure the Database
+### 3.- Configure the Database
+
+- Run a MYSQL server.
+
+- Import the [queries.sql](database/queries.sql) file to your MySQL graphic client like MySQL Workbench or copy the queries from that same file: [queries.sql](/database/queries.sql) and paste them into your graphic client.
+
+### 4.- Run the Server
+
+Go to the [server folder](/server/) and run the following command:
+```
+node index.js
+```
+### 5.- Now it's ready to use 
+
+:D
+#### Dependencies used
+- "body-parser": "^1.19.0",
+- "compression": "^1.7.4",
+- "dotenv": "^16.0.0",
+- "express": "^4.17.3",
+- "express-jwt": "^6.1.1",
+- "helmet": "^5.0.2",
+- "jsonwebtoken": "^8.5.1",
+- "mysql2": "^2.3.3",
+- "sequelize": "^6.20.0",
+- "nodemon": "^2.0.18"

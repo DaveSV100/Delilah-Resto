@@ -20,8 +20,7 @@ SET NAMES utf8mb4;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
-# Dump of table Dishes
-# ------------------------------------------------------------
+CREATE DATABASE IF NOT EXISTS Delilah;
 
 DROP TABLE IF EXISTS `Dishes`;
 

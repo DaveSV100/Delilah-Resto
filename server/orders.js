@@ -2,7 +2,7 @@ const express = require("express");
 const sequelize = require("../database/connection.js");
 const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
-const jwtKey = process.env.JWTKEY;
+const JWTKEY = require("../utils/config.js")
 const router = express.Router();
 const {
   checkAdmin,
@@ -17,7 +17,7 @@ const { use } = require("./users.js");
 
 //Check token
 router.use(
-  expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({
+  expressJwt({ secret: JWTKEY, algorithms: ["HS256"] }).unless({
     path: ["/"],
   })
 );
