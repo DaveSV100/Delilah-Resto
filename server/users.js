@@ -1,9 +1,10 @@
 const express = require("express");
+require("dotenv").config({ path: "../.env" });
 const sequelize = require("../database/connection.js");
 const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
-const JWTKEY = require("../utils/config.js")
 const router = express.Router();
+const jwtKey = process.env.JWTKEY;
 const {
     checkAdmin,
     verifyUser,
@@ -12,7 +13,7 @@ const {
   } = require("../utils/utils");
 
 //Check token
-router.use(expressJwt({ secret: JWTKEY, algorithms: ["HS256"] }).unless({ path: ["/", "/signup", "/users/login"] }));
+router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: ["/", "/users/signup", "/users/login"] }));
 router.use(function (err, req, res, next) {
     if (err.name === "UnauthorizedError") {
         res.status(401).send("You need to sign in or sign up");
@@ -74,7 +75,7 @@ router.post("/users/login", verifyUser, async (req, res) => {
     }
 });
 router.post("/users/signup", existingUser, async (req, res) => {
-    //User sign up. The followwing fields are required
+    //User sign up. The following fields are required
     const { name, email, password, direction } = req.body;
     try {
         if (name && email && password && direction) {
@@ -110,15 +111,20 @@ router.put("/users/client-update", async(req, res) => {
     //Update for normal clients
     const { name, email, password, direction } = req.body;
     try {
-        console.log(req.user.payload);
-        /* The ID of user is taken from the "payload" which was created when the token was generated. 
-        Changes will be applied only to that specific account */
-        const user_id = await req.user.payload.id;
-        const update = await sequelize.query(
-            "UPDATE users SET name = :name, email = :email, password = :password, direction = :direction WHERE id = :id",
-            { replacements: {name, email, password, direction, id: user_id} }
-        )
-        res.status(200).json(`User updated corrrectly`);
+        const role = req.user.payload.role;
+        if(role == 1) {
+            res.status(400).json("You need to go to the other endpoint for admins");
+        } else {
+            console.log(req.user.payload);
+            /* The ID of user is taken from the "payload" which was created when the token was generated. 
+            Changes will be applied only to that specific account */
+            const user_id = await req.user.payload.id;
+            const update = await sequelize.query(
+                "UPDATE users SET name = :name, email = :email, password = :password, direction = :direction WHERE id = :id",
+                { replacements: {name, email, password, direction, id: user_id} }
+            )
+            res.status(200).json(`User updated corrrectly`);
+        }
     } catch (error) {
         console.error(error);
         res.status(400).json(error);
@@ -138,7 +144,7 @@ router.delete("/users/admin-delete/:id", checkAdmin, async(req, res) => {
             res.status(400).json("Error: " + error);
         }
 })
-router.delete("/users/client-delete", verifyUser, async(req, res) => {
+router.delete("/users/client-delete", async(req, res) => {
     //Normal clients can delete its own account
     try {
         const user_id = await req.user.payload.id;

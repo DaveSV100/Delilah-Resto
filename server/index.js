@@ -5,14 +5,9 @@ const app = express();
 const helmet = require("helmet");
 const cors = require("cors");
 const expressJwt = require("express-jwt");
-// const jwtKey = process.env.JWTKEY;
-// const port = process.env.SERVER_PORT;
-// require("dotenv").config();
-
-const {
-  JWTKEY,
-  SERVER_PORT,
-} = require("../utils/config.js")
+require("dotenv").config({ path: "../.env" });
+const jwtKey = process.env.JWTKEY;
+const SERVER_PORT = process.env.SERVER_PORT;
 
 const userRoute = require("./users.js");
 const dishes = require("./dishes.js");
@@ -30,7 +25,7 @@ app.use("/", orders);
 
 //Check token
 //algorithms: ["RS256"]
-app.use(expressJwt({ secret: JWTKEY, algorithms: ["HS256"] }).unless({ path: [ "/" ] }));
+app.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/" ] }));
 //Port listener
 app.listen(SERVER_PORT, () => {
   console.log(`Server started on port ${SERVER_PORT}`);

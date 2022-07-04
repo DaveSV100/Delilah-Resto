@@ -2,7 +2,8 @@ const express = require("express");
 const sequelize = require("../database/connection.js");
 const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
-const JWTKEY = require("../utils/config.js")
+require("dotenv").config({ path: "../.env" });
+const jwtKey = process.env.JWTKEY;
 const router = express.Router();
 const {
   checkAdmin,
@@ -17,7 +18,7 @@ const { use } = require("./users.js");
 
 //Check token
 router.use(
-  expressJwt({ secret: JWTKEY, algorithms: ["HS256"] }).unless({
+  expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({
     path: ["/"],
   })
 );
@@ -35,7 +36,7 @@ router.get("/orders", async (req, res) => {
   if(req.user.payload.role == 1 ) {
     try {
       const records = await sequelize.query(
-      "SELECT Orders_dishes.id, Orders.status, Orders.date, Dishes.description, Dishes.image, Dishes.price, Orders.payment, Users.Name, Users.direction FROM Orders INNER JOIN orders_dishes ON Orders.ID = Orders_dishes.Order_id INNER JOIN Dishes ON Orders_dishes.Dish_id = Dishes.id INNER JOIN users ON Orders.User_id = users.id ORDER BY Orders_dishes.id ASC", 
+      "SELECT Orders.id, Orders.status, Orders.date, Dishes.description, Dishes.image, Dishes.price, Orders.payment, Users.Name, Users.direction FROM Orders INNER JOIN orders_dishes ON Orders.ID = Orders_dishes.Order_id INNER JOIN Dishes ON Orders_dishes.Dish_id = Dishes.id INNER JOIN users ON Orders.User_id = users.id ORDER BY Orders.ID ASC", 
       { type: sequelize.QueryTypes.SELECT }
       )
       records.length == 0 ? res.status(404).json("There are no orders") : res.status(200).json(records);
@@ -48,7 +49,7 @@ router.get("/orders", async (req, res) => {
       //Search by User ID
       try {
         const records = await sequelize.query(
-          "SELECT Orders_dishes.id, Orders.status, Orders.date, Dishes.description, Dishes.image, Dishes.price, Orders.payment, Users.Name, Users.direction FROM Orders INNER JOIN orders_dishes ON Orders.ID = Orders_dishes.Order_id INNER JOIN Dishes ON Orders_dishes.Dish_id = Dishes.id INNER JOIN users ON Orders.User_id = users.id WHERE Users.id= :id", 
+          "SELECT Orders.id, Orders.status, Orders.date, Dishes.description, Dishes.image, Dishes.price, Orders.payment, Users.Name, Users.direction FROM Orders INNER JOIN orders_dishes ON Orders.ID = Orders_dishes.Order_id INNER JOIN Dishes ON Orders_dishes.Dish_id = Dishes.id INNER JOIN users ON Orders.User_id = users.id WHERE Users.id= :id ORDER BY Orders.ID ASC", 
           { replacements: {id: user_id}, type: sequelize.QueryTypes.SELECT }
           )
         records[0] != null ? res.status(200).json(records) : res.status(404).json("You haven't made any order");

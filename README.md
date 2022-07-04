@@ -5,7 +5,7 @@
 Backend of a restaurant application where you can manage users, dishes and make orders.
 ## Get started
 
-## Specifications
+### Specifications
 
 The specification for this API is in [Open API Docs](/spec.yaml).
 

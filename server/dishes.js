@@ -2,7 +2,8 @@ const express = require("express");
 const sequelize = require("../database/connection.js");
 const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
-const JWTKEY = require("../utils/config.js")
+require("dotenv").config({ path: "../.env" });
+const jwtKey = process.env.JWTKEY;
 const router = express.Router();
 const {
     checkAdmin,
@@ -11,7 +12,7 @@ const {
 } = require("../utils/utils.js");
 
 //Verify token
-router.use(expressJwt({ secret: JWTKEY, algorithms: ["HS256"] }).unless({ path: [ "/" ] }));
+router.use(expressJwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [ "/" ] }));
 router.use(function (err, req, res, next) {
     if (err.name === "UnauthorizedError") {
         res.status(401).send("You need to sign in or sign up");

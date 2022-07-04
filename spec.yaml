@@ -227,7 +227,7 @@ paths:
         $ref: '#/securityDefinitions/bearerAuth' 
       - adminAuth:
         $ref: '#/securityDefinitions/adminAuth'
-  /users/client-delete/:id:
+  /users/client-delete:
     delete:
       tags:
       - users
