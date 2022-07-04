@@ -8,7 +8,8 @@ Backend of a restaurant application where you can manage users, dishes and make 
 ## Specifications
 
 The specification for this API is in [Open API Docs](/spec.yaml).
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/11310918-65b92027-3618-4e45-892f-10de5219a031?action=collection%2Ffork&collection-url=entityId%3D11310918-65b92027-3618-4e45-892f-10de5219a031%26entityType%3Dcollection%26workspaceId%3Dc826a992-312b-490c-a58c-f68166b54224)
+
+[View Postman samples](https://documenter.getpostman.com/view/11310918/UzJFvdtB).
 
 ### 1.- Clone the repository
 
