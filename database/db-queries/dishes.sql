@@ -1,5 +1,5 @@
-CREATE DATABASE  IF NOT EXISTS `testing-delilah` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `testing-delilah`;
+CREATE DATABASE  IF NOT EXISTS `delilah_resto` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `delilah_resto`;
 -- MySQL dump 10.13  Distrib 8.0.29, for macos12 (x86_64)
 --
 -- Host: localhost    Database: testing-delilah
@@ -18,33 +18,29 @@ USE `testing-delilah`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Orders`
+-- Table structure for table `Dishes`
 --
 
-DROP TABLE IF EXISTS `Orders`;
+DROP TABLE IF EXISTS `Dishes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `Orders` (
+CREATE TABLE `Dishes` (
   `ID` int NOT NULL AUTO_INCREMENT,
-  `Status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `Date` datetime NOT NULL,
-  `Dish_id` int NOT NULL,
-  `User_id` int NOT NULL,
-  `Payment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  PRIMARY KEY (`ID`),
-  KEY `FK=>Orders.User.id-Users.ID` (`User_id`),
-  CONSTRAINT `FK=>Orders.User.id-Users.ID` FOREIGN KEY (`User_id`) REFERENCES `Users` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `Description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+  `Price` int NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Orders`
+-- Dumping data for table `Dishes`
 --
 
-LOCK TABLES `Orders` WRITE;
-/*!40000 ALTER TABLE `Orders` DISABLE KEYS */;
-INSERT INTO `Orders` VALUES (1,'Delivering','2022-07-01 11:22:33',1,1,'Cash'),(2,'New','2022-07-01 11:28:35',1,8,'Cash'),(3,'New','2022-07-01 11:28:35',2,8,'Cash'),(4,'New','2022-07-01 11:48:59',4,1,'Cash');
-/*!40000 ALTER TABLE `Orders` ENABLE KEYS */;
+LOCK TABLES `Dishes` WRITE;
+/*!40000 ALTER TABLE `Dishes` DISABLE KEYS */;
+INSERT INTO `Dishes` VALUES (1,'Tacos','https://taquitos.pexels.com/photos/5454019/pexels-photo-5454019.jpeg?cs=srgb&dl=pexels-jeswin-thomas-5454019.jpg&fm=jpg',12),(2,'Tostadas','https://guerrerotortillas.com/es/recetas/tostadas-de-picadillo/',20),(4,'Burger','https://burger.com/es/recetas/tostadas-de-picadillo/',30);
+/*!40000 ALTER TABLE `Dishes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -56,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-07-04  0:04:03
+-- Dump completed on 2022-07-04  0:04:02

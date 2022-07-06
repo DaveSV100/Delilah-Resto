@@ -1,5 +1,5 @@
-CREATE DATABASE  IF NOT EXISTS `testing-delilah` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `testing-delilah`;
+CREATE DATABASE  IF NOT EXISTS `delilah_resto` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `delilah_resto`;
 -- MySQL dump 10.13  Distrib 8.0.29, for macos12 (x86_64)
 --
 -- Host: localhost    Database: testing-delilah
@@ -18,29 +18,31 @@ USE `testing-delilah`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Dishes`
+-- Table structure for table `Users`
 --
 
-DROP TABLE IF EXISTS `Dishes`;
+DROP TABLE IF EXISTS `Users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `Dishes` (
+CREATE TABLE `Users` (
   `ID` int NOT NULL AUTO_INCREMENT,
-  `Description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `Image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  `Price` int NOT NULL,
+  `Name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Direction` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Admin` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Dishes`
+-- Dumping data for table `Users`
 --
 
-LOCK TABLES `Dishes` WRITE;
-/*!40000 ALTER TABLE `Dishes` DISABLE KEYS */;
-INSERT INTO `Dishes` VALUES (1,'Tacos','https://taquitos.pexels.com/photos/5454019/pexels-photo-5454019.jpeg?cs=srgb&dl=pexels-jeswin-thomas-5454019.jpg&fm=jpg',12),(2,'Tostadas','https://guerrerotortillas.com/es/recetas/tostadas-de-picadillo/',20),(4,'Burger','https://burger.com/es/recetas/tostadas-de-picadillo/',30);
-/*!40000 ALTER TABLE `Dishes` ENABLE KEYS */;
+LOCK TABLES `Users` WRITE;
+/*!40000 ALTER TABLE `Users` DISABLE KEYS */;
+INSERT INTO `Users` VALUES (1,'Nicole Lepariz','nicole@lepretty.com','nicole1029','Monaco 21, Italy',0),(2,'Brittany Brown','brit@departments.com','iambrit','Hills 12, Ventura California USA',1),(8,'Katy Heard','katy@gmail.com','heardkaty','Walk of fame 13, Mnahattan, NY USA',0);
+/*!40000 ALTER TABLE `Users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

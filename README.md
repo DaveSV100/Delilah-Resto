@@ -9,7 +9,7 @@ Backend of a restaurant application where you can manage users, dishes and make 
 
 The specification for this API is in [Open API Docs](/spec.yaml).
 
-[View Postman samples](https://documenter.getpostman.com/view/11310918/UzJFvdtB).
+You can copy [Postman samples](https://documenter.getpostman.com/view/11310918/UzJFvdtB) as well.
 
 ### 1.- Clone the repository
 
@@ -31,7 +31,7 @@ npm install
 
 - Run a MYSQL server.
 
-- Import the [queries.sql](database/queries.sql) file to your MySQL graphic client like MySQL Workbench or copy the queries from that same file: [queries.sql](/database/queries.sql) and paste them into your graphic client.
+- Import the [queries](database/db-queries) folder into your graphic client like MySQL Workbench.
 
 ### 4.- Run the Server
 

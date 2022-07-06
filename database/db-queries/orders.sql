@@ -1,5 +1,5 @@
-CREATE DATABASE  IF NOT EXISTS `testing-delilah` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `testing-delilah`;
+CREATE DATABASE  IF NOT EXISTS `delilah_resto` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `delilah_resto`;
 -- MySQL dump 10.13  Distrib 8.0.29, for macos12 (x86_64)
 --
 -- Host: localhost    Database: testing-delilah
@@ -18,32 +18,33 @@ USE `testing-delilah`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Orders_dishes`
+-- Table structure for table `Orders`
 --
 
-DROP TABLE IF EXISTS `Orders_dishes`;
+DROP TABLE IF EXISTS `Orders`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `Orders_dishes` (
+CREATE TABLE `Orders` (
   `ID` int NOT NULL AUTO_INCREMENT,
-  `Order_id` int DEFAULT NULL,
-  `Dish_id` int DEFAULT NULL,
+  `Status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Date` datetime NOT NULL,
+  `Dish_id` int NOT NULL,
+  `User_id` int NOT NULL,
+  `Payment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`ID`),
-  KEY `FK=>Orders_dishes.Order_id-Orders.ID` (`Order_id`),
-  KEY `FK=>Orders_dishes.Dish_id-Dishes.ID` (`Dish_id`),
-  CONSTRAINT `FK=>Orders_dishes.Dish_id-Dishes.ID` FOREIGN KEY (`Dish_id`) REFERENCES `Dishes` (`ID`),
-  CONSTRAINT `FK=>Orders_dishes.Order_id-Orders.ID` FOREIGN KEY (`Order_id`) REFERENCES `Orders` (`ID`) ON DELETE CASCADE
+  KEY `FK=>Orders.User.id-Users.ID` (`User_id`),
+  CONSTRAINT `FK=>Orders.User.id-Users.ID` FOREIGN KEY (`User_id`) REFERENCES `Users` (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Orders_dishes`
+-- Dumping data for table `Orders`
 --
 
-LOCK TABLES `Orders_dishes` WRITE;
-/*!40000 ALTER TABLE `Orders_dishes` DISABLE KEYS */;
-INSERT INTO `Orders_dishes` VALUES (1,1,1),(2,2,1),(3,3,2),(5,4,4);
-/*!40000 ALTER TABLE `Orders_dishes` ENABLE KEYS */;
+LOCK TABLES `Orders` WRITE;
+/*!40000 ALTER TABLE `Orders` DISABLE KEYS */;
+INSERT INTO `Orders` VALUES (1,'Delivering','2022-07-01 11:22:33',1,1,'Cash'),(2,'New','2022-07-01 11:28:35',1,8,'Cash'),(3,'New','2022-07-01 11:28:35',2,8,'Cash'),(4,'New','2022-07-01 11:48:59',4,1,'Cash');
+/*!40000 ALTER TABLE `Orders` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
